@@ -1,0 +1,19 @@
+{
+  "name": "Odat Marafoni",
+  "short_name": "Marafon",
+  "description": "30 kunlik odat kuzatuvchi va 3 oylik maqsad rejalashtiruvchi",
+  "id": "odat-marafoni",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F3F4EC",
+  "theme_color": "#2F7A52",
+  "lang": "uz",
+  "dir": "ltr",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

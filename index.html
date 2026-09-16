@@ -1,0 +1,2373 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Odat Marafoni</title>
+<meta name="description" content="30 kunlik odat kuzatuvchi va 3 oylik maqsad rejalashtiruvchi — telefoningizga o'rnatib, internetsiz ham ishlatiladigan shaxsiy dastur.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2F7A52">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Marafon">
+<script>(function(){try{var t=localStorage.getItem('odat-marafoni-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#F3F4EC;
+    --surface:#FFFFFF;
+    --surface-2:#EAEDE1;
+    --ink:#1D2A20;
+    --ink-dim:#5C6B5E;
+    --accent:#2F7A52;
+    --accent-strong:#1F5C3C;
+    --accent-soft:#DCEEE1;
+    --gold:#D99A2B;
+    --gold-soft:#FBEBCD;
+    --line:#DBDFCF;
+    --danger:#BD5346;
+    --danger-soft:#F6E2DE;
+    --shadow: 0 1px 2px rgba(30,42,32,.06), 0 8px 24px -12px rgba(30,42,32,.18);
+    --radius:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#12160F;
+      --surface:#181F15;
+      --surface-2:#1F281B;
+      --ink:#EAEFE2;
+      --ink-dim:#9BAA96;
+      --accent:#63C98E;
+      --accent-strong:#8AE0AF;
+      --accent-soft:#213B2A;
+      --gold:#F0BC5E;
+      --gold-soft:#3A2E15;
+      --line:#2B3426;
+      --danger:#E1786A;
+      --danger-soft:#3A2420;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#12160F;
+    --surface:#181F15;
+    --surface-2:#1F281B;
+    --ink:#EAEFE2;
+    --ink-dim:#9BAA96;
+    --accent:#63C98E;
+    --accent-strong:#8AE0AF;
+    --accent-soft:#213B2A;
+    --gold:#F0BC5E;
+    --gold-soft:#3A2E15;
+    --line:#2B3426;
+    --danger:#E1786A;
+    --danger-soft:#3A2420;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.55);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Manrope',system-ui,sans-serif;
+    padding-inline:16px;
+    padding-block:22px 48px;
+  }
+  #app{ max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:22px; }
+
+  h1,h2,h3{ font-family:'Fraunces',Georgia,serif; text-wrap:balance; margin:0; }
+  .num{ font-family:'IBM Plex Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+
+  a{ color:var(--accent-strong); }
+  button{ font-family:inherit; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation:none !important; } }
+
+  /* ---------- header ---------- */
+  .topbar{
+    display:flex; flex-wrap:wrap; gap:14px 22px; align-items:center; justify-content:space-between;
+  }
+  .brand{ display:flex; flex-direction:column; gap:4px; }
+  .brand h1{ font-size:clamp(22px,4vw,28px); font-weight:700; letter-spacing:-.01em; }
+  .brand .sub{ color:var(--ink-dim); font-size:13px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .pill{
+    display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px;
+    background:var(--surface-2); font-size:12.5px; font-weight:600; white-space:nowrap;
+  }
+  .pill.day{ color:var(--accent-strong); background:var(--accent-soft); }
+  .pill-clickable{
+    cursor:pointer; border:1px dashed var(--line); transition:border-color 0.15s, background 0.15s;
+  }
+  .pill-clickable:hover{ border-color:var(--accent); background:var(--accent-soft); }
+  .pill-edit-icon{ font-size:11px; opacity:0.65; }
+  .start-date-hidden-input{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+  .reset-link{
+    border:none; background:none; color:var(--ink-dim); font-size:12.5px; cursor:pointer;
+    text-decoration:underline; text-underline-offset:2px; padding:2px 0;
+  }
+  .reset-link:hover{ color:var(--danger); }
+
+  .level-box{
+    display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--line);
+    border-radius:999px; padding:8px 16px 8px 8px; box-shadow:var(--shadow);
+  }
+  .level-badge{
+    width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:var(--gold-soft); font-size:19px; flex:none;
+  }
+  .level-text{ display:flex; flex-direction:column; line-height:1.25; }
+  .level-text .lv{ font-weight:800; font-size:13.5px; }
+  .level-text .xp{ font-size:12px; color:var(--ink-dim); }
+  .xp-track{ width:96px; height:5px; border-radius:3px; background:var(--surface-2); margin-top:4px; overflow:hidden; }
+  .xp-fill{ height:100%; background:linear-gradient(90deg,var(--gold),var(--accent)); border-radius:3px; }
+
+  /* ---------- hero stat cards ---------- */
+  .hero{ display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:12px; }
+  .stat-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:8px; min-width:0;
+  }
+  .stat-card .label{ font-size:12px; color:var(--ink-dim); font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
+  .stat-card .big{ font-family:'Fraunces',serif; font-size:30px; font-weight:700; line-height:1; }
+  .stat-card .foot{ font-size:12.5px; color:var(--ink-dim); }
+  .donut-wrap{ position:relative; width:88px; height:88px; margin:0 auto; }
+  .donut-wrap .center{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column;
+  }
+  .donut-wrap .center .pct{ font-family:'Fraunces',serif; font-weight:700; font-size:19px; }
+  .stat-card.center-card{ align-items:center; text-align:center; }
+  .streak-line{ display:flex; align-items:center; gap:6px; font-size:14px; }
+
+  /* ---------- section shell ---------- */
+  .section{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:14px;
+  }
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .section-head h2{ font-size:18px; }
+  .section-head .hint{ font-size:12.5px; color:var(--ink-dim); }
+
+  /* ---------- add habit form ---------- */
+  .add-habit{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .add-habit input[type=text]{
+    flex:1 1 200px; min-width:0; padding:10px 12px; border-radius:10px; border:1px solid var(--line);
+    background:var(--bg); color:var(--ink); font:inherit; font-size:14px;
+  }
+  .emoji-row{ display:flex; flex-wrap:wrap; gap:4px; }
+  .emoji-btn{
+    width:32px; height:32px; border-radius:8px; border:1px solid var(--line); background:var(--bg);
+    font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .emoji-btn[aria-pressed="true"]{ border-color:var(--accent); background:var(--accent-soft); }
+  .btn{
+    border:none; border-radius:10px; padding:10px 16px; font-weight:700; font-size:14px; cursor:pointer;
+    background:var(--accent); color:#fff;
+  }
+  .btn:hover{ background:var(--accent-strong); }
+  .btn.ghost{ background:var(--surface-2); color:var(--ink); }
+  .btn.small{ padding:6px 10px; font-size:12.5px; border-radius:8px; }
+
+  /* ---------- grid ---------- */
+  .grid-scroll{ overflow-x:auto; border-radius:12px; border:1px solid var(--line); }
+  table.grid{ border-collapse:separate; border-spacing:0; width:100%; }
+  table.grid th, table.grid td{ padding:0; }
+  .col-head{
+    font-size:11px; color:var(--ink-dim); font-weight:700; text-align:center; padding:8px 4px 6px;
+    min-width:34px; border-bottom:1px solid var(--line); background:var(--surface-2);
+  }
+  .col-head .wd{ display:block; }
+  .col-head .dn{ display:block; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink); }
+  .col-head.today{ background:var(--gold-soft); color:var(--ink); }
+  .col-head.weekstart{ border-left:2px solid var(--line); }
+  .sticky-col{
+    position:sticky; left:0; z-index:2; background:var(--surface); min-width:190px; max-width:220px;
+    border-right:1px solid var(--line);
+  }
+  thead .sticky-col{ background:var(--surface-2); z-index:3; }
+  .habit-cell{ display:flex; align-items:center; gap:8px; padding:10px 10px; }
+  .habit-cell .emoji{ font-size:18px; flex:none; }
+  .habit-name{ font-weight:700; font-size:13.5px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:text; }
+  .habit-name input{ width:100%; font:inherit; font-weight:700; font-size:13.5px; padding:2px 4px; border-radius:6px; border:1px solid var(--accent); background:var(--bg); color:var(--ink); }
+  .habit-flame{ font-size:11.5px; color:var(--ink-dim); flex:none; font-family:'IBM Plex Mono',monospace; }
+  .del-btn{ border:none; background:none; color:var(--ink-dim); cursor:pointer; font-size:14px; padding:2px 4px; flex:none; }
+  .del-btn:hover{ color:var(--danger); }
+  .del-confirm{ display:flex; gap:4px; align-items:center; font-size:11.5px; flex:none; }
+  .del-confirm button{ border:none; border-radius:6px; padding:2px 6px; cursor:pointer; font-weight:700; }
+  .del-confirm .yes{ background:var(--danger-soft); color:var(--danger); }
+  .del-confirm .no{ background:var(--surface-2); color:var(--ink); }
+
+  .cell{ text-align:center; border-bottom:1px solid var(--line); background:var(--surface); }
+  .cell.weekstart{ border-left:2px solid var(--line); }
+  .cell.today{ background:var(--gold-soft); }
+  .cell-btn{
+    width:30px; height:30px; margin:4px auto; border-radius:8px; border:1.5px solid var(--line);
+    background:var(--bg); cursor:pointer; display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:transparent; padding:0;
+  }
+  .cell-btn.done{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .cell-btn.past.missed{ border-color:var(--danger); background:var(--danger-soft); }
+  .cell-btn:disabled{ opacity:.35; cursor:default; }
+  .cell-btn:not(:disabled):hover{ border-color:var(--accent); }
+
+  tfoot .sticky-col{ background:var(--surface-2); font-weight:700; font-size:12.5px; }
+  tfoot td.cell{ background:var(--surface-2); font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-dim); padding:6px 2px; }
+
+  /* ---------- two-col layout ---------- */
+  .two-col{ display:grid; grid-template-columns:1.1fr 1fr; gap:16px; align-items:stretch; }
+  @media (max-width:720px){ .two-col{ grid-template-columns:1fr; } }
+
+  .lb-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .lb-table th{ text-align:left; font-size:11px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.05em; padding:0 8px 8px; border-bottom:1px solid var(--line); }
+  .lb-table td{ padding:9px 8px; border-bottom:1px solid var(--line); }
+  .lb-table tr:last-child td{ border-bottom:none; }
+  .lb-rank{ font-family:'IBM Plex Mono',monospace; color:var(--ink-dim); width:18px; }
+  .lb-name{ display:flex; align-items:center; gap:6px; font-weight:700; }
+  .lb-bar-wrap{ display:flex; align-items:center; gap:8px; }
+  .lb-bar-track{ width:56px; height:6px; border-radius:3px; background:var(--surface-2); overflow:hidden; }
+  .lb-bar-fill{ height:100%; background:var(--accent); border-radius:3px; }
+
+  /* ---------- achievements ---------- */
+  .ach-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
+  .ach{
+    border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:4px;
+    background:var(--surface-2); opacity:.55; filter:grayscale(.6);
+  }
+  .ach.earned{ opacity:1; filter:none; background:var(--accent-soft); border-color:var(--accent); }
+  .ach .icon{ font-size:20px; }
+  .ach .title{ font-weight:700; font-size:13px; }
+  .ach .desc{ font-size:11.5px; color:var(--ink-dim); }
+
+  /* ---------- journal ---------- */
+  .journal-form{ display:flex; flex-direction:column; gap:8px; }
+  .journal-form textarea{
+    width:100%; min-height:64px; resize:vertical; padding:10px 12px; border-radius:10px; border:1px solid var(--line);
+    background:var(--bg); color:var(--ink); font:inherit; font-size:14px;
+  }
+  .journal-entry{ border-top:1px solid var(--line); padding-top:10px; display:flex; flex-direction:column; gap:2px; }
+  .journal-entry .jd{ font-size:11.5px; color:var(--ink-dim); font-family:'IBM Plex Mono',monospace; }
+  .journal-entry .jt{ font-size:13.5px; white-space:pre-wrap; }
+  .journal-empty{ font-size:13px; color:var(--ink-dim); }
+
+  .footnote{ font-size:12px; color:var(--ink-dim); text-align:center; line-height:1.5; }
+
+  /* ---------- goals ---------- */
+  .goal-add{ display:flex; gap:8px; flex-wrap:wrap; }
+  .goal-add input[type=text]{
+    flex:1 1 220px; min-width:0; padding:10px 12px; border-radius:10px; border:1px solid var(--line);
+    background:var(--bg); color:var(--ink); font:inherit; font-size:14px;
+  }
+  .goals-list{ display:flex; flex-direction:column; gap:14px; }
+  .goal-card{
+    border:1px solid var(--line); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:12px;
+    background:var(--bg);
+  }
+  .goal-head{ display:flex; align-items:center; gap:8px; }
+  .goal-title-input{
+    flex:1; min-width:0; font-family:'Fraunces',serif; font-weight:700; font-size:16px; border:none;
+    background:transparent; color:var(--ink); padding:2px 0; border-bottom:1px solid transparent;
+  }
+  .goal-title-input:focus{ border-bottom-color:var(--accent); outline:none; }
+  .goal-note{
+    width:100%; min-height:52px; resize:vertical; padding:9px 11px; border-radius:9px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink); font:inherit; font-size:13px;
+  }
+  .goal-months{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .goal-month label{ display:block; font-size:10.5px; color:var(--ink-dim); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+  .goal-month input{
+    width:100%; padding:7px 9px; border-radius:8px; border:1px solid var(--line); background:var(--surface);
+    color:var(--ink); font:inherit; font-size:12.5px;
+  }
+  .goal-daily-block{ border-top:1px dashed var(--line); padding-top:10px; }
+  .goal-daily-title{ font-size:11px; font-weight:700; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
+  .goal-daily-ul{ list-style:none; margin:0 0 8px; padding:0; display:flex; flex-direction:column; gap:6px; }
+  .goal-daily-item{ display:flex; align-items:center; gap:8px; font-size:13.5px; }
+  .goal-daily-item label{ flex:1; min-width:0; overflow-wrap:anywhere; }
+  .goal-daily-item.done label{ text-decoration:line-through; color:var(--ink-dim); }
+  .goal-daily-item input[type=checkbox]{ width:16px; height:16px; accent-color:var(--accent); flex:none; }
+  .goal-daily-add{ display:flex; gap:6px; }
+  .goal-daily-add input{
+    flex:1; min-width:0; padding:7px 9px; border-radius:8px; border:1px solid var(--line); background:var(--surface);
+    color:var(--ink); font:inherit; font-size:12.5px;
+  }
+  .goal-link-row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .goal-link-row select{
+    flex:1 1 190px; min-width:0; padding:8px 10px; border-radius:9px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink); font:inherit; font-size:12.5px;
+  }
+  .goal-link-row input[type=number]{
+    width:150px; padding:8px 10px; border-radius:9px; border:1px solid var(--line); background:var(--surface);
+    color:var(--ink); font:inherit; font-size:12.5px;
+  }
+  .goal-progress{ display:flex; flex-direction:column; gap:6px; }
+  .goal-progress-track{ height:10px; border-radius:6px; background:var(--surface-2); overflow:hidden; }
+  .goal-progress-fill{ height:100%; background:linear-gradient(90deg,var(--accent),var(--gold)); border-radius:6px; }
+  .goal-progress-text{ font-size:12px; color:var(--ink-dim); display:flex; justify-content:space-between; gap:8px; }
+
+  /* ---------- install banner ---------- */
+  .install-bar{
+    display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    background:var(--accent-soft); border:1px solid var(--accent); border-radius:12px; padding:10px 14px; font-size:13px;
+  }
+  .install-bar.show{ display:flex; }
+  .install-bar .txt{ color:var(--accent-strong); font-weight:600; }
+  .install-bar .actions{ display:flex; gap:8px; }
+
+  /* ---------- theme toggle ---------- */
+  .theme-toggle-btn{
+    border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:50%;
+    width:40px; height:40px; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    box-shadow:var(--shadow); flex:none;
+  }
+
+  /* ---------- pomodoro / focus timer ---------- */
+  .pomodoro-wrap{ display:flex; flex-wrap:wrap; gap:28px; align-items:center; justify-content:center; padding:4px 0; }
+  .pomodoro-ring-wrap{ position:relative; width:200px; height:200px; flex:none; }
+  .pomodoro-ring{ width:100%; height:100%; transform:rotate(-90deg); display:block; }
+  .pomodoro-ring-bg{ fill:none; stroke:var(--line); stroke-width:10; }
+  .pomodoro-ring-fg{
+    fill:none; stroke:var(--accent); stroke-width:10; stroke-linecap:round;
+    transition:stroke-dashoffset 0.25s linear, stroke 0.25s linear;
+  }
+  .pomodoro-ring-fg.is-done{ stroke:var(--danger); }
+  .pomodoro-time{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:38px; font-weight:800; letter-spacing:0.5px; color:var(--ink);
+    font-variant-numeric:tabular-nums;
+  }
+  .pomodoro-controls{ display:flex; flex-direction:column; gap:12px; min-width:220px; flex:1 1 220px; max-width:320px; }
+  .pomodoro-duration-row{ display:flex; align-items:center; gap:8px; }
+  .pomodoro-duration-row label{ font-size:13.5px; color:var(--ink-dim); }
+  .pomodoro-duration-row input[type=number]{
+    width:72px; padding:7px 9px; border-radius:8px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink); font:inherit; font-size:14px;
+  }
+  .pomodoro-presets{ display:flex; gap:6px; flex-wrap:wrap; }
+  .pomodoro-preset{ min-width:42px; }
+  .pomodoro-preset[aria-pressed="true"]{ border-color:var(--accent); background:var(--accent-soft); color:var(--accent-strong); }
+  .pomodoro-buttons{ display:flex; gap:8px; flex-wrap:wrap; }
+  .pomodoro-track-row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .pomodoro-duration-row input:disabled,
+  .pomodoro-presets button:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  /* ---------- settings ---------- */
+  .settings-row{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
+  .settings-item{ display:flex; align-items:center; gap:8px; font-size:13.5px; cursor:pointer; }
+  .settings-item input[type=checkbox]{ width:17px; height:17px; accent-color:var(--accent); }
+  .settings-row input[type=time]{
+    padding:7px 9px; border-radius:8px; border:1px solid var(--line); background:var(--surface);
+    color:var(--ink); font:inherit; font-size:13px;
+  }
+  .settings-row input[type=text].push-url{
+    flex:1 1 240px; min-width:0; padding:7px 9px; border-radius:8px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink); font:inherit; font-size:13px;
+  }
+  .push-sub{ display:flex; flex-direction:column; gap:6px; }
+  .push-sub-label{ font-size:13.5px; font-weight:700; }
+
+  /* ---------- archive ---------- */
+  .archive-card{ border:1px solid var(--line); border-radius:12px; padding:12px 14px; background:var(--bg); }
+  .archive-card summary{
+    cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:10px;
+    flex-wrap:wrap; font-weight:700; font-size:13.5px; list-style:none;
+  }
+  .archive-card summary::-webkit-details-marker{ display:none; }
+  .archive-card summary::marker{ content:''; }
+  .archive-card summary::before{ content:'▸'; margin-right:6px; color:var(--ink-dim); }
+  .archive-card[open] summary::before{ content:'▾'; }
+  .archive-range{ font-family:'Fraunces',serif; }
+  .archive-summary{ font-size:12.5px; color:var(--ink-dim); font-weight:600; }
+  .archive-body{ margin-top:10px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="install-bar" id="installBar">
+    <span class="txt">📲 Ushbu dasturni telefoningizga o'rnatib qo'ying — internetsiz ham ishlaydi.</span>
+    <span class="actions">
+      <button class="btn small" type="button" id="installBtn">O'rnatish</button>
+      <button class="btn ghost small" type="button" id="installDismissBtn">Yopish</button>
+    </span>
+  </div>
+  <div class="topbar">
+    <div class="brand">
+      <h1>🏁 Odat Marafoni</h1>
+      <div class="sub">
+        <span class="pill day" id="dayPill">Kun —/30</span>
+        <label class="pill pill-clickable" id="rangePillLabel" for="startDateInput" title="Boshlanish sanasini o'zgartirish uchun bosing">
+          <span id="rangePill">—</span><span class="pill-edit-icon">✎</span>
+        </label>
+        <input type="date" id="startDateInput" class="start-date-hidden-input" aria-label="Marafon boshlanish sanasi">
+        <button class="reset-link" id="resetBtn" type="button">Yangi marafon boshlash</button>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="level-box">
+        <div class="level-badge" id="levelEmoji">🌱</div>
+        <div class="level-text">
+          <span class="lv" id="levelName">Boshlovchi</span>
+          <span class="xp num" id="xpText">0 XP</span>
+          <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <button class="theme-toggle-btn" id="themeToggleBtn" type="button" title="Rejimni almashtirish (avtomatik / yorug' / qorong'i)">🌓</button>
+    </div>
+  </div>
+
+  <div class="hero" id="heroStats"></div>
+
+  <div class="section">
+    <div class="section-head">
+      <h2>🍅 Fokus taymeri</h2>
+      <span class="hint">Vaqtni o'zingiz belgilang, kamayib boradi, tugaganda ovozli signal beradi</span>
+    </div>
+    <div class="pomodoro-wrap">
+      <div class="pomodoro-ring-wrap">
+        <svg class="pomodoro-ring" viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="pomodoro-ring-bg" cx="100" cy="100" r="90"></circle>
+          <circle class="pomodoro-ring-fg" id="pomodoroRingFg" cx="100" cy="100" r="90"></circle>
+        </svg>
+        <div class="pomodoro-time" id="pomodoroTimeDisplay">25:00</div>
+      </div>
+      <div class="pomodoro-controls">
+        <div class="pomodoro-duration-row">
+          <label for="pomodoroMinutes">Daqiqa:</label>
+          <input type="number" id="pomodoroMinutes" min="1" max="180" step="1" value="25" inputmode="numeric">
+          <button class="btn ghost small" id="pomodoroSetBtn" type="button">Belgilash</button>
+        </div>
+        <div class="pomodoro-presets" id="pomodoroPresets">
+          <button class="btn ghost small pomodoro-preset" data-min="5" type="button">5</button>
+          <button class="btn ghost small pomodoro-preset" data-min="15" type="button">15</button>
+          <button class="btn ghost small pomodoro-preset" data-min="25" type="button" aria-pressed="true">25</button>
+          <button class="btn ghost small pomodoro-preset" data-min="45" type="button">45</button>
+        </div>
+        <label class="settings-item">
+          <input type="checkbox" id="pomodoroAmbientToggle">
+          <span>🎵 Fon ovozi (fokus vaqtida)</span>
+        </label>
+        <div class="pomodoro-track-row">
+          <button class="btn ghost small" id="pomodoroTrackPickBtn" type="button">📁 O'z musiqangizni yuklash</button>
+          <input type="file" id="pomodoroTrackFile" accept="audio/*" style="display:none;">
+          <button class="btn ghost small" id="pomodoroTrackRemoveBtn" type="button" style="display:none;">✕ Standartga qaytarish</button>
+        </div>
+        <p class="hint" id="pomodoroTrackHint" style="margin:0;">Hozircha: tabiat ovozi (avtomatik yaratilgan)</p>
+        <div class="pomodoro-buttons">
+          <button class="btn" id="pomodoroStartBtn" type="button">▶️ Boshlash</button>
+          <button class="btn ghost" id="pomodoroPauseBtn" type="button" style="display:none;">⏸️ Pauza</button>
+          <button class="btn ghost" id="pomodoroResetBtn" type="button">↺ Qayta</button>
+        </div>
+        <p class="hint" id="pomodoroHint" style="margin:0;"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <h2>🎯 3 oylik maqsadlar</h2>
+      <span class="hint">Katta maqsadni oyma-oy va kunlik qadamlarga bo'ling</span>
+    </div>
+    <form class="goal-add" id="goalAddForm">
+      <input type="text" id="newGoalTitle" placeholder="Yangi 3 oylik maqsad (masalan: Rus tilini B1 darajasiga chiqarish)" maxlength="80" autocomplete="off">
+      <button class="btn" type="submit">+ Qo'shish</button>
+    </form>
+    <div class="goals-list" id="goalsList"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <h2>📋 30 kunlik jadval</h2>
+      <span class="hint">Bugungi ustun ⭐ bilan belgilangan · kelajakdagi kunlar hali yopiq</span>
+    </div>
+    <form class="add-habit" id="addHabitForm">
+      <div class="emoji-row" id="emojiRow"></div>
+      <input type="text" id="newHabitName" placeholder="Yangi odat qo'shing (masalan: Erta turish)" maxlength="40" autocomplete="off">
+      <button class="btn" type="submit">+ Qo'shish</button>
+    </form>
+    <div class="grid-scroll"><div id="gridWrap"></div></div>
+  </div>
+
+  <div class="two-col">
+    <div class="section">
+      <div class="section-head"><h2>📅 Haftalik dinamika</h2></div>
+      <div id="weeklyChart"></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><h2>🏆 Eng barqaror odatlar</h2></div>
+      <div id="leaderboard"></div>
+    </div>
+  </div>
+
+  <div class="section" id="archiveSection" style="display:none;">
+    <div class="section-head">
+      <h2>🗄️ Oldingi marafonlar</h2>
+      <span class="hint">Har bir tugagan 30 kunlik davr shu yerda saqlanadi</span>
+    </div>
+    <div id="archiveList" style="display:flex; flex-direction:column; gap:10px;"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>🎖️ Yutuqlar</h2></div>
+    <div class="ach-grid" id="achGrid"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>📓 Kundalik / Xulosalar</h2></div>
+    <form class="journal-form" id="journalForm">
+      <textarea id="journalText" placeholder="Bugun nima yaxshi ketdi? Nimani yaxshilash kerak?"></textarea>
+      <button class="btn ghost" type="submit" style="align-self:flex-start;">Saqlash</button>
+    </form>
+    <div id="journalList"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>⚙️ Sozlamalar</h2></div>
+    <div class="settings-row">
+      <label class="settings-item">
+        <input type="checkbox" id="reminderToggle">
+        <span>Kunlik eslatma yuborish</span>
+      </label>
+      <input type="time" id="reminderTime" value="20:00">
+    </div>
+    <p class="hint" id="reminderHint" style="margin:0;"></p>
+    <div class="push-sub">
+      <div class="push-sub-label">🔔 Ilova to'liq yopiq bo'lsa ham eslatma (push-server)</div>
+      <div class="settings-row">
+        <input type="text" class="push-url" id="pushServerUrl" placeholder="https://odat-marafoni-push.SIZNING-NOM.workers.dev" autocomplete="off">
+      </div>
+      <div class="settings-row">
+        <button class="btn ghost small" id="pushEnableBtn" type="button">🔔 Ulash va yoqish</button>
+        <button class="btn ghost small" id="pushDisableBtn" type="button">🔕 O'chirish</button>
+      </div>
+      <p class="hint" id="pushHint" style="margin:0;"></p>
+    </div>
+    <div class="settings-row">
+      <button class="btn ghost small" id="exportBtn" type="button">⬇️ Zaxira nusxa (yuklab olish)</button>
+      <button class="btn ghost small" id="importBtn" type="button">⬆️ Zaxiradan tiklash</button>
+      <input type="file" id="restoreFile" accept="application/json" style="display:none">
+    </div>
+  </div>
+
+  <div class="footnote">
+    ℹ️ Foizlar, seriyalar va XP jadvalni belgilashingiz asosida <strong>avtomatik</strong> hisoblanadi — qo'lda hech narsa kiritish shart emas. Barcha ma'lumotlar shu qurilmada, shu brauzerda saqlanadi.
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var EMOJIS = ['🎯','🌅','💪','📚','🧠','💧','🧘','🌙','🏃','💼','💰','🕌','❤️','✨','🎨','🍎'];
+  var HABIT_LIMIT = 12;
+  var GOAL_LIMIT = 6;
+  var LEVELS = [
+    {min:0,    name:'Boshlovchi', emoji:'🌱'},
+    {min:200,  name:'Barqaror',   emoji:'⚡'},
+    {min:500,  name:'Intizomli',  emoji:'🔥'},
+    {min:1000, name:'Kuchli',     emoji:'💎'},
+    {min:2000, name:'Elita',      emoji:'👑'}
+  ];
+  var WEEKDAY_UZ = ['Ya','Du','Se','Ch','Pa','Ju','Sh'];
+
+  var state = null;
+  var todayStr = todayISO();
+  var pendingDeleteId = null;
+  var editingHabitId = null;
+  var pendingDeleteGoalId = null;
+  var selectedEmoji = EMOJIS[0];
+
+  // ---------- date helpers ----------
+  function todayISO(){
+    var d = new Date();
+    var local = new Date(d.getTime() - d.getTimezoneOffset()*60000);
+    return local.toISOString().slice(0,10);
+  }
+  function addDays(iso, n){
+    var d = new Date(iso + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().slice(0,10);
+  }
+  function dayIndexForDate(iso, startIso){
+    var a = Date.parse(iso + 'T00:00:00Z');
+    var b = Date.parse(startIso + 'T00:00:00Z');
+    return Math.round((a - b) / 86400000) + 1;
+  }
+  function weekdayOf(iso){
+    var d = new Date(iso + 'T00:00:00Z');
+    return WEEKDAY_UZ[d.getUTCDay()];
+  }
+  function fmtShort(iso){
+    var d = new Date(iso + 'T00:00:00Z');
+    return d.getUTCDate() + '.' + (d.getUTCMonth()+1);
+  }
+
+  // ---------- state ----------
+  function seedState(startIso){
+    return {
+      startDate: startIso,
+      habits: [
+        {id:'h1', name:"Erta uyg'onish", emoji:'🌅', createdDay:1},
+        {id:'h2', name:'Sport / mashq qilish', emoji:'💪', createdDay:1},
+        {id:'h3', name:"20 bet kitob o'qish", emoji:'📚', createdDay:1},
+        {id:'h4', name:'Ingliz tili', emoji:'🧠', createdDay:1},
+        {id:'h5', name:'2 litr suv ichish', emoji:'💧', createdDay:1},
+        {id:'h6', name:'Meditatsiya', emoji:'🧘', createdDay:1},
+        {id:'h7', name:"23:00'dan oldin uxlash", emoji:'🌙', createdDay:1}
+      ],
+      logs: {},
+      journal: [],
+      goals: [],
+      archive: [],
+      reminder: { enabled:false, time:'20:00', lastFiredDate:null },
+      push: { serverUrl:'', subscribed:false }
+    };
+  }
+  function normalizeState(raw){
+    if(!raw || typeof raw !== 'object') return seedState(todayStr);
+    // Reconstruct into plain, fully mutable objects/arrays -- defensive against
+    // any unexpected shape in old saved data, and cheap insurance either way.
+    try{ raw = JSON.parse(JSON.stringify(raw)); }catch(e){}
+    var habits = Array.isArray(raw.habits) ? raw.habits : [];
+    habits = habits.map(function(h){
+      return { id:h.id, name:h.name, emoji:h.emoji, createdDay: h.createdDay || 1 };
+    });
+    var logs = {};
+    if(raw.logs && typeof raw.logs === 'object'){
+      Object.keys(raw.logs).forEach(function(day){
+        var dayLog = raw.logs[day];
+        logs[day] = (dayLog && typeof dayLog === 'object') ? Object.assign({}, dayLog) : {};
+      });
+    }
+    var habitIds = {};
+    habits.forEach(function(h){ habitIds[h.id] = true; });
+    var goals = Array.isArray(raw.goals) ? raw.goals : [];
+    goals = goals.map(function(g){
+      var monthly = Array.isArray(g.monthly) ? g.monthly.slice(0,3) : [];
+      while(monthly.length < 3) monthly.push('');
+      var daily = Array.isArray(g.daily) ? g.daily.map(function(d){
+        return { id:d.id, text:d.text, done: !!d.done };
+      }) : [];
+      var linkedHabitId = (g.linkedHabitId && habitIds[g.linkedHabitId]) ? g.linkedHabitId : null;
+      return {
+        id:g.id, title:g.title||'', note:g.note||'', monthly:monthly, daily:daily,
+        linkedHabitId: linkedHabitId,
+        targetCount: parseInt(g.targetCount,10) || 0,
+        carryOverCount: parseInt(g.carryOverCount,10) || 0
+      };
+    });
+    var archive = Array.isArray(raw.archive) ? raw.archive.map(function(a){
+      return {
+        id: a.id, startDate: a.startDate, endDate: a.endDate,
+        totalDone: a.totalDone||0, totalPossible: a.totalPossible||0, overallRate: a.overallRate||0,
+        perfectDays: a.perfectDays||0, xp: a.xp||0, bestStreakOverall: a.bestStreakOverall||0,
+        bestStreakHabitName: a.bestStreakHabitName || null,
+        habits: Array.isArray(a.habits) ? a.habits.map(function(h){
+          return { id:h.id, name:h.name||'', emoji:h.emoji||'🎯', doneCount:h.doneCount||0, span:h.span||0, completionRate:h.completionRate||0, bestStreak:h.bestStreak||0 };
+        }) : []
+      };
+    }) : [];
+    var reminder = (raw.reminder && typeof raw.reminder === 'object')
+      ? { enabled: !!raw.reminder.enabled, time: raw.reminder.time || '20:00', lastFiredDate: raw.reminder.lastFiredDate || null }
+      : { enabled:false, time:'20:00', lastFiredDate:null };
+    var push = (raw.push && typeof raw.push === 'object')
+      ? { serverUrl: raw.push.serverUrl || '', subscribed: !!raw.push.subscribed }
+      : { serverUrl:'', subscribed:false };
+    return {
+      startDate: raw.startDate || todayStr,
+      habits: habits,
+      logs: logs,
+      journal: Array.isArray(raw.journal) ? raw.journal.map(function(j){ return Object.assign({}, j); }) : [],
+      goals: goals,
+      archive: archive,
+      reminder: reminder,
+      push: push
+    };
+  }
+  function loadLocal(){
+    try{
+      var raw = localStorage.getItem('odat-marafoni-state');
+      return raw ? normalizeState(JSON.parse(raw)) : null;
+    }catch(e){ return null; }
+  }
+  function saveLocal(){
+    try{ localStorage.setItem('odat-marafoni-state', JSON.stringify(state)); }catch(e){ console.warn('saqlab bo\'lmadi', e); }
+  }
+
+  // Mirror just the reminder settings into IndexedDB. localStorage isn't
+  // reachable from a service worker at all, so this is the only way the
+  // background periodic-sync check (in sw.js) can see the current reminder
+  // time/enabled flag and record when it last fired.
+  function idbSetReminder(reminder){
+    try{
+      if(!('indexedDB' in window)) return;
+      var req = indexedDB.open('odat-marafoni-db', 1);
+      req.onupgradeneeded = function(){ try{ req.result.createObjectStore('kv'); }catch(e){} };
+      req.onsuccess = function(){
+        try{
+          var db = req.result;
+          var tx = db.transaction('kv', 'readwrite');
+          tx.objectStore('kv').put(reminder, 'reminder');
+        }catch(e){}
+      };
+      req.onerror = function(){};
+    }catch(e){}
+  }
+
+  function persist(){
+    saveLocal();
+    idbSetReminder(state.reminder);
+  }
+
+  // ---------- derived data ----------
+  function todayDayIndex(){
+    var idx = dayIndexForDate(todayStr, state.startDate);
+    if(idx < 0) idx = 0;
+    if(idx > 30) idx = 30;
+    return idx;
+  }
+  function isDone(day, habitId){
+    return !!(state.logs[day] && state.logs[day][habitId]);
+  }
+  function habitArray(habitId){
+    var arr = [];
+    for(var d=1; d<=30; d++) arr.push(isDone(d, habitId));
+    return arr;
+  }
+  // How many of that day's ACTIVE habits (already created by then) got done.
+  function dayStats(d){
+    var active = state.habits.filter(function(h){ return (h.createdDay||1) <= d; });
+    var done = 0;
+    active.forEach(function(h){ if(isDone(d, h.id)) done++; });
+    return { done: done, active: active.length };
+  }
+  // Total number of days a given habit was ever marked done in the CURRENT
+  // 30-day grid (state.logs). This is combined with a goal's carryOverCount
+  // (banked whenever the marathon resets or the link changes) so a goal's
+  // progress keeps accumulating across marathons instead of resetting to 0.
+  function habitDoneCountInLogs(habitId){
+    var count = 0;
+    Object.keys(state.logs).forEach(function(d){
+      if(state.logs[d] && state.logs[d][habitId]) count++;
+    });
+    return count;
+  }
+  function goalProgress(g){
+    var live = g.linkedHabitId ? habitDoneCountInLogs(g.linkedHabitId) : 0;
+    var total = (g.carryOverCount||0) + live;
+    var target = g.targetCount || 0;
+    var rate = target > 0 ? Math.min(1, total/target) : 0;
+    return { total: total, target: target, rate: rate };
+  }
+  function computeHabitStats(habit){
+    var arr = habitArray(habit.id);
+    var tracked = todayDayIndex();
+    var start = Math.min(Math.max(habit.createdDay || 1, 1), 30);
+    var span = Math.max(0, tracked - start + 1);
+    var doneUpToToday = 0;
+    for(var i=start; i<=tracked; i++) if(arr[i-1]) doneUpToToday++;
+    var completionRate = span > 0 ? doneUpToToday / span : 0;
+    var best = 0, run = 0;
+    for(var d=start; d<=30; d++){ if(arr[d-1]){ run++; if(run>best) best=run; } else run = 0; }
+    var current = 0;
+    for(var d2 = Math.min(tracked,30); d2>=start; d2--){ if(arr[d2-1]) current++; else break; }
+    return { doneCount: doneUpToToday, span: span, completionRate: completionRate, bestStreak: best, currentStreak: current };
+  }
+  function computeAll(){
+    var tracked = todayDayIndex();
+    var perHabit = {};
+    state.habits.forEach(function(h){ perHabit[h.id] = computeHabitStats(h); });
+
+    var totalPossible = 0, totalDone = 0;
+    state.habits.forEach(function(h){ totalPossible += perHabit[h.id].span; totalDone += perHabit[h.id].doneCount; });
+    var overallRate = totalPossible > 0 ? totalDone/totalPossible : 0;
+
+    var perfectDays = 0;
+    for(var d=1; d<=tracked; d++){
+      var activeHabits = state.habits.filter(function(h){ return (h.createdDay||1) <= d; });
+      if(activeHabits.length === 0) continue;
+      var allDone = activeHabits.every(function(h){ return isDone(d, h.id); });
+      if(allDone) perfectDays++;
+    }
+
+    var xp = totalDone*10 + perfectDays*50;
+    var bestStreakOverall = 0, bestStreakHabit = null;
+    state.habits.forEach(function(h){
+      var s = perHabit[h.id];
+      if(s.bestStreak >= 7)  xp += 100;
+      if(s.bestStreak >= 14) xp += 200;
+      if(s.bestStreak >= 30) xp += 500;
+      if(s.currentStreak > bestStreakOverall){ bestStreakOverall = s.currentStreak; bestStreakHabit = h; }
+    });
+
+    var level = LEVELS[0];
+    for(var i=0;i<LEVELS.length;i++){ if(xp >= LEVELS[i].min) level = LEVELS[i]; }
+    var nextLevel = LEVELS.find(function(l){ return l.min > xp; });
+    var xpProgress = nextLevel ? (xp - level.min) / (nextLevel.min - level.min) : 1;
+
+    var todayCount = 0;
+    if(tracked >= 1){
+      state.habits.forEach(function(h){ if(isDone(tracked, h.id)) todayCount++; });
+    }
+
+    // The 7-day block ("week") that today falls into -- days 1-7, 8-14, ...
+    var weekIndex = Math.floor((Math.max(tracked,1)-1)/7);
+    var weekStartDay = weekIndex*7 + 1;
+    var weekEndDay = Math.min(weekStartDay+6, 30);
+    var weekDone = 0, weekPossible = 0;
+    for(var wd=weekStartDay; wd<=weekEndDay; wd++){
+      if(wd > tracked) continue;
+      var wds = dayStats(wd);
+      weekDone += wds.done; weekPossible += wds.active;
+    }
+    var weekRate = weekPossible > 0 ? weekDone/weekPossible : 0;
+
+    return {
+      tracked: tracked, perHabit: perHabit, totalPossible: totalPossible, totalDone: totalDone,
+      overallRate: overallRate, perfectDays: perfectDays, xp: xp, level: level, nextLevel: nextLevel,
+      xpProgress: xpProgress, bestStreakOverall: bestStreakOverall, bestStreakHabit: bestStreakHabit,
+      todayCount: todayCount,
+      weekStartDay: weekStartDay, weekEndDay: weekEndDay, weekDone: weekDone, weekPossible: weekPossible, weekRate: weekRate
+    };
+  }
+
+  // ---------- rendering ----------
+  function donutSvg(pct, color){
+    var size=88, stroke=9, r=(size-stroke)/2, c=2*Math.PI*r;
+    var off = c * (1 - Math.max(0,Math.min(1,pct)));
+    return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">' +
+      '<circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="var(--line)" stroke-width="'+stroke+'"/>' +
+      '<circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+stroke+
+        '" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+
+        '" transform="rotate(-90 '+size/2+' '+size/2+')"/></svg>';
+  }
+  function pct(n){ return Math.round(n*100) + '%'; }
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function renderHero(calc){
+    var el = document.getElementById('heroStats');
+    var endDate = addDays(state.startDate, 29);
+    document.getElementById('rangePill').textContent = fmtShort(state.startDate) + ' – ' + fmtShort(endDate);
+    var startInputEl = document.getElementById('startDateInput');
+    if(startInputEl && startInputEl.value !== state.startDate) startInputEl.value = state.startDate;
+    var dayLabel = calc.tracked >= 30 ? 'Marafon tugadi 🎉' : ('Kun ' + Math.max(calc.tracked,0) + '/30');
+    document.getElementById('dayPill').textContent = dayLabel;
+
+    document.getElementById('levelEmoji').textContent = calc.level.emoji;
+    document.getElementById('levelName').textContent = calc.level.name;
+    document.getElementById('xpText').textContent = calc.xp + ' XP';
+    document.getElementById('xpFill').style.width = Math.round(calc.xpProgress*100) + '%';
+
+    var streakLine = calc.bestStreakHabit
+      ? (calc.bestStreakHabit.emoji + ' ' + esc(calc.bestStreakHabit.name))
+      : 'Hali seriya yo\'q';
+    var weekStartIso = addDays(state.startDate, calc.weekStartDay-1);
+    var weekEndIso = addDays(state.startDate, calc.weekEndDay-1);
+
+    el.innerHTML =
+      '<div class="stat-card center-card">' +
+        '<div class="donut-wrap"><div class="center"><span class="pct">'+pct(calc.overallRate)+'</span></div>' + donutSvg(calc.overallRate,'var(--accent)') + '</div>' +
+        '<div class="label">Umumiy progress</div>' +
+        '<div class="foot num">'+calc.totalDone+' / '+calc.totalPossible+' bajarildi</div>' +
+      '</div>' +
+      '<div class="stat-card">' +
+        '<div class="label">7 kunlik</div>' +
+        '<div class="big num">'+calc.weekDone+' / '+calc.weekPossible+'</div>' +
+        '<div class="foot">'+(calc.weekPossible ? pct(calc.weekRate)+' bajarildi · '+fmtShort(weekStartIso)+'–'+fmtShort(weekEndIso) : 'Hafta hali boshlanmagan')+'</div>' +
+      '</div>' +
+      '<div class="stat-card">' +
+        '<div class="label">Eng yaxshi seriya</div>' +
+        '<div class="big num">🔥 '+calc.bestStreakOverall+'</div>' +
+        '<div class="foot">'+streakLine+'</div>' +
+      '</div>' +
+      '<div class="stat-card">' +
+        '<div class="label">Mukammal kunlar</div>' +
+        '<div class="big num">💯 '+calc.perfectDays+'</div>' +
+        '<div class="foot">barcha odatlar bajarilgan kunlar</div>' +
+      '</div>';
+  }
+
+  function renderEmojiRow(){
+    var el = document.getElementById('emojiRow');
+    el.innerHTML = EMOJIS.map(function(e){
+      return '<button type="button" class="emoji-btn" data-emoji="'+e+'" aria-pressed="'+(e===selectedEmoji)+'">'+e+'</button>';
+    }).join('');
+  }
+
+  function renderGrid(calc){
+    var el = document.getElementById('gridWrap');
+    var tracked = calc.tracked;
+    var head = '<thead><tr><th class="sticky-col corner">Odat</th>';
+    for(var d=1; d<=30; d++){
+      var dateIso = addDays(state.startDate, d-1);
+      var isToday = d === tracked && tracked >= 1 && tracked <= 30;
+      var weekstart = (d-1) % 7 === 0 && d !== 1;
+      head += '<th class="col-head'+(isToday?' today':'')+(weekstart?' weekstart':'')+'">' +
+        '<span class="wd">'+weekdayOf(dateIso)+'</span><span class="dn">'+fmtShort(dateIso)+'</span></th>';
+    }
+    head += '</tr></thead>';
+
+    var body = '<tbody>';
+    if(state.habits.length === 0){
+      body += '<tr><td class="sticky-col habit-cell" colspan="31" style="color:var(--ink-dim);">Hali odat yo\'q — yuqoridan qo\'shing</td>' +
+        '</tr>';
+    }
+    state.habits.forEach(function(h){
+      var s = calc.perHabit[h.id];
+      body += '<tr data-habit-row="'+h.id+'"><td class="sticky-col habit-cell">';
+      if(editingHabitId === h.id){
+        body += '<span class="emoji">'+h.emoji+'</span>' +
+          '<span class="habit-name" style="cursor:default;"><input type="text" data-rename="'+h.id+'" value="'+esc(h.name)+'" maxlength="40"></span>';
+      } else if(pendingDeleteId === h.id){
+        body += '<span class="emoji">'+h.emoji+'</span>' +
+          '<span class="habit-name" style="color:var(--danger);">O\'chirilsinmi?</span>' +
+          '<span class="del-confirm">' +
+            '<button type="button" class="yes" data-confirm-del="'+h.id+'">Ha</button>' +
+            '<button type="button" class="no" data-cancel-del="'+h.id+'">Yo\'q</button>' +
+          '</span>';
+      } else {
+        body += '<span class="emoji">'+h.emoji+'</span>' +
+          '<span class="habit-name" data-rename-start="'+h.id+'" title="Nomini o\'zgartirish uchun bosing">'+esc(h.name)+'</span>' +
+          '<span class="habit-flame">🔥'+s.currentStreak+'</span>' +
+          '<button type="button" class="del-btn" data-del="'+h.id+'" title="O\'chirish">✕</button>';
+      }
+      body += '</td>';
+      var createdDay = h.createdDay || 1;
+      for(var d=1; d<=30; d++){
+        var done = isDone(d, h.id);
+        var beforeCreated = d < createdDay;
+        var isToday = d === tracked && tracked>=1 && tracked<=30;
+        var isFuture = d > tracked || beforeCreated;
+        var isPast = (d < tracked || tracked > 30) && !beforeCreated;
+        var weekstart = (d-1) % 7 === 0 && d !== 1;
+        var cls = 'cell'+(isToday?' today':'')+(weekstart?' weekstart':'');
+        var btnCls = 'cell-btn'+(done?' done':'')+(isPast && !done ? ' past missed':'');
+        body += '<td class="'+cls+'"><button type="button" class="'+btnCls+'" data-toggle-day="'+d+'" data-toggle-habit="'+h.id+'" '+(isFuture?'disabled':'')+' aria-pressed="'+done+'" aria-label="'+esc(h.name)+' - kun '+d+'">'+(done?'✓':(beforeCreated?'·':''))+'</button></td>';
+      }
+      body += '</tr>';
+    });
+    body += '</tbody>';
+
+    var foot = '<tfoot><tr><td class="sticky-col">Kunlik %</td>';
+    for(var d=1; d<=30; d++){
+      var weekstart = (d-1) % 7 === 0 && d !== 1;
+      var dayPct = '—';
+      var ds0 = dayStats(d);
+      if(d <= tracked && ds0.active){
+        dayPct = Math.round((ds0.done/ds0.active)*100);
+      }
+      foot += '<td class="cell'+(weekstart?' weekstart':'')+'">'+dayPct+(dayPct==='—'?'':'%')+'</td>';
+    }
+    foot += '</tr></tfoot>';
+
+    el.innerHTML = '<table class="grid">'+head+body+foot+'</table>';
+
+    if(editingHabitId){
+      var input = el.querySelector('[data-rename="'+editingHabitId+'"]');
+      if(input){ input.focus(); input.select(); }
+    }
+  }
+
+  var WEEKDAY_FULL_UZ = ['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'];
+  function renderWeekly(calc){
+    var el = document.getElementById('weeklyChart');
+    var days = [];
+    for(var d=calc.weekStartDay; d<=calc.weekEndDay; d++){
+      var dateIso = addDays(state.startDate, d-1);
+      var value = null;
+      if(d <= calc.tracked){
+        var ds = dayStats(d);
+        value = ds.active>0 ? ds.done/ds.active : 0;
+      }
+      days.push({
+        dayNum: d,
+        weekday: WEEKDAY_FULL_UZ[new Date(dateIso+'T00:00:00Z').getUTCDay()],
+        dateLabel: fmtShort(dateIso),
+        value: value,
+        isToday: d === calc.tracked
+      });
+    }
+    var W=360,H=190,pad=24,barW=(W-pad*2)/days.length*0.55,gap=(W-pad*2)/days.length;
+    var svg = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:400px;display:block;margin:0 auto;">';
+    [0,25,50,75,100].forEach(function(g){
+      var y = H-46-(g/100)*(H-70);
+      svg += '<line x1="'+pad+'" y1="'+y+'" x2="'+(W-8)+'" y2="'+y+'" stroke="var(--line)" stroke-width="1"/>';
+    });
+    days.forEach(function(dy,i){
+      var x = pad + i*gap + (gap-barW)/2;
+      var v = dy.value===null ? 0 : dy.value;
+      var barH = v * (H-70);
+      var y = H-46-barH;
+      var fill = dy.isToday ? 'var(--gold)' : 'var(--accent)';
+      svg += '<rect x="'+x+'" y="'+y+'" width="'+barW+'" height="'+Math.max(barH,0)+'" rx="5" fill="'+fill+'"/>';
+      svg += '<text x="'+(x+barW/2)+'" y="'+(y-6)+'" text-anchor="middle" font-size="11" fill="var(--ink)" font-family="IBM Plex Mono, monospace">'+(dy.value===null?'—':Math.round(v*100)+'%')+'</text>';
+      svg += '<text x="'+(x+barW/2)+'" y="'+(H-30)+'" text-anchor="middle" font-size="10.5" font-weight="700" fill="'+(dy.isToday?'var(--gold)':'var(--ink)')+'">'+esc(dy.weekday.slice(0,3))+'</text>';
+      svg += '<text x="'+(x+barW/2)+'" y="'+(H-16)+'" text-anchor="middle" font-size="10" fill="var(--ink-dim)" font-family="IBM Plex Mono, monospace">'+dy.dateLabel+'</text>';
+    });
+    svg += '</svg>';
+    el.innerHTML = svg;
+  }
+
+  function renderLeaderboard(calc){
+    var el = document.getElementById('leaderboard');
+    if(state.habits.length === 0){ el.innerHTML = '<div class="journal-empty">Hali odat yo\'q.</div>'; return; }
+    var rows = state.habits.map(function(h){ return {h:h, s:calc.perHabit[h.id]}; });
+    rows.sort(function(a,b){ return b.s.completionRate - a.s.completionRate; });
+    var html = '<div style="overflow-x:auto;"><table class="lb-table"><thead><tr>' +
+      '<th></th><th>Odat</th><th>%</th><th>Joriy</th><th>Rekord</th></tr></thead><tbody>';
+    rows.forEach(function(r,i){
+      html += '<tr><td class="lb-rank">'+(i+1)+'</td>' +
+        '<td class="lb-name">'+r.h.emoji+' '+esc(r.h.name)+'</td>' +
+        '<td><div class="lb-bar-wrap"><div class="lb-bar-track"><div class="lb-bar-fill" style="width:'+Math.round(r.s.completionRate*100)+'%"></div></div><span class="num">'+pct(r.s.completionRate)+'</span></div></td>' +
+        '<td class="num">🔥'+r.s.currentStreak+'</td>' +
+        '<td class="num">'+r.s.bestStreak+'</td></tr>';
+    });
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
+  }
+
+  function renderAchievements(calc){
+    var el = document.getElementById('achGrid');
+    var maxBest = 0;
+    Object.keys(calc.perHabit).forEach(function(id){ if(calc.perHabit[id].bestStreak>maxBest) maxBest=calc.perHabit[id].bestStreak; });
+    var list = [
+      {icon:'🌱', title:'Birinchi qadam', desc:'Birinchi odatni belgilash', earned: calc.totalDone>=1},
+      {icon:'🔥', title:'3 kunlik seriya', desc:'Har qanday odat 3 kun ketma-ket', earned: maxBest>=3},
+      {icon:'🔥', title:'7 kunlik seriya', desc:'Har qanday odat 7 kun ketma-ket', earned: maxBest>=7},
+      {icon:'🔥', title:'14 kunlik seriya', desc:'Har qanday odat 14 kun ketma-ket', earned: maxBest>=14},
+      {icon:'🔥', title:'21 kunlik seriya', desc:'Har qanday odat 21 kun ketma-ket', earned: maxBest>=21},
+      {icon:'🏆', title:'30 kunlik chempion', desc:'Bironta odatni 30 kun uzluksiz', earned: maxBest>=30},
+      {icon:'💯', title:'Mukammal kun', desc:'Bir kunda barcha odatlar bajarilgan', earned: calc.perfectDays>=1},
+      {icon:'💪', title:'Barqarorlik ustasi', desc:'Umumiy bajarilish 80% dan yuqori', earned: calc.tracked>=7 && calc.overallRate>=0.8}
+    ];
+    el.innerHTML = list.map(function(a){
+      return '<div class="ach'+(a.earned?' earned':'')+'"><div class="icon">'+a.icon+'</div><div class="title">'+a.title+'</div><div class="desc">'+a.desc+'</div></div>';
+    }).join('');
+  }
+
+  function renderJournal(){
+    var el = document.getElementById('journalList');
+    if(!state.journal.length){ el.innerHTML = '<div class="journal-empty">Hali yozuv yo\'q. Kuningizni qanday o\'tganini yozib qo\'ying.</div>'; return; }
+    var items = state.journal.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+    el.innerHTML = items.map(function(j){
+      return '<div class="journal-entry"><span class="jd">'+esc(j.date)+'</span><span class="jt">'+esc(j.text)+'</span></div>';
+    }).join('');
+  }
+
+  function renderGoals(){
+    var el = document.getElementById('goalsList');
+    if(!state.goals.length){
+      el.innerHTML = '<div class="journal-empty">Hali maqsad yo\'q — yuqoridan 3 oylik maqsadingizni yozib, oyma-oy va kunlik qadamlarga bo\'ling.</div>';
+      return;
+    }
+    el.innerHTML = state.goals.map(function(g){
+      var monthsHtml = g.monthly.map(function(m,i){
+        return '<div class="goal-month">' +
+          '<label>'+(i+1)+'-oy</label>' +
+          '<input type="text" data-goal-month="'+g.id+'" data-month-idx="'+i+'" value="'+esc(m)+'" placeholder="'+(i+1)+'-oy uchun qadam" maxlength="120">' +
+        '</div>';
+      }).join('');
+      var doneCount = g.daily.filter(function(d){ return d.done; }).length;
+      var dailyHtml = g.daily.length
+        ? '<ul class="goal-daily-ul">' + g.daily.map(function(d){
+            return '<li class="goal-daily-item'+(d.done?' done':'')+'">' +
+              '<input type="checkbox" data-goal-daily-toggle="'+g.id+'" data-daily-id="'+d.id+'" '+(d.done?'checked':'')+' id="gd_'+d.id+'">' +
+              '<label for="gd_'+d.id+'">'+esc(d.text)+'</label>' +
+              '<button type="button" class="del-btn" data-goal-daily-del="'+g.id+'" data-daily-id="'+d.id+'" title="O\'chirish">✕</button>' +
+            '</li>';
+          }).join('') + '</ul>'
+        : '<div class="journal-empty" style="margin-bottom:6px;">Hali kunlik qadam yo\'q.</div>';
+      var delControl = (pendingDeleteGoalId === g.id)
+        ? '<span class="del-confirm">' +
+            '<button type="button" class="yes" data-confirm-del-goal="'+g.id+'">Ha</button>' +
+            '<button type="button" class="no" data-cancel-del-goal="'+g.id+'">Yo\'q</button>' +
+          '</span>'
+        : '<button type="button" class="del-btn" data-del-goal="'+g.id+'" title="O\'chirish">✕</button>';
+      var habitOptions = '<option value="">— odat bilan bog\'lanmagan —</option>' + state.habits.map(function(h){
+        return '<option value="'+h.id+'"'+(g.linkedHabitId===h.id?' selected':'')+'>'+h.emoji+' '+esc(h.name)+'</option>';
+      }).join('');
+      var linkRow = '<div class="goal-link-row">' +
+        '<select data-goal-link="'+g.id+'" title="30 kunlik jadvaldagi qaysi odat bu maqsadga hisoblansin">' + habitOptions + '</select>' +
+        '<input type="number" min="0" data-goal-target="'+g.id+'" value="'+(g.targetCount?g.targetCount:'')+'" placeholder="Maqsad soni (masalan: 90)">' +
+      '</div>';
+      var gp = goalProgress(g);
+      var progressHtml = g.linkedHabitId
+        ? '<div class="goal-progress">' +
+            '<div class="goal-progress-track"><div class="goal-progress-fill" style="width:'+Math.round(gp.rate*100)+'%"></div></div>' +
+            '<div class="goal-progress-text"><span>'+gp.total+(gp.target?(' / '+gp.target):'')+' marta bajarildi</span><span>'+(gp.target?pct(gp.rate):'')+'</span></div>' +
+          '</div>'
+        : '';
+      return '<div class="goal-card" data-goal-card="'+g.id+'">' +
+        '<div class="goal-head">' +
+          '<input type="text" class="goal-title-input" data-goal-title="'+g.id+'" value="'+esc(g.title)+'" maxlength="80" placeholder="Maqsad nomi">' +
+          delControl +
+        '</div>' +
+        '<textarea class="goal-note" data-goal-note="'+g.id+'" placeholder="Izoh / nima uchun bu maqsad muhim?">'+esc(g.note)+'</textarea>' +
+        linkRow +
+        progressHtml +
+        '<div class="goal-months">' + monthsHtml + '</div>' +
+        '<div class="goal-daily-block">' +
+          '<div class="goal-daily-title">Kunlik qadamlar ('+doneCount+'/'+g.daily.length+')</div>' +
+          dailyHtml +
+          '<form class="goal-daily-add" data-goal-daily-form="'+g.id+'">' +
+            '<input type="text" data-goal-daily-input="'+g.id+'" placeholder="Yangi kunlik qadam qo\'shish" maxlength="80" autocomplete="off">' +
+            '<button class="btn small" type="submit">+</button>' +
+          '</form>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderArchive(){
+    var section = document.getElementById('archiveSection');
+    if(!section) return;
+    if(!state.archive || !state.archive.length){ section.style.display = 'none'; return; }
+    section.style.display = '';
+    var list = document.getElementById('archiveList');
+    list.innerHTML = state.archive.map(function(a){
+      var rows = a.habits.map(function(h){
+        return '<tr><td class="lb-name">'+h.emoji+' '+esc(h.name)+'</td>' +
+          '<td class="num">'+pct(h.completionRate)+'</td>' +
+          '<td class="num">'+h.doneCount+'/'+h.span+'</td>' +
+          '<td class="num">🔥'+h.bestStreak+'</td></tr>';
+      }).join('');
+      return '<details class="archive-card">' +
+        '<summary>' +
+          '<span class="archive-range">'+fmtShort(a.startDate)+' – '+fmtShort(a.endDate)+'</span>' +
+          '<span class="archive-summary num">'+pct(a.overallRate)+' · 💯'+a.perfectDays+' · 🔥'+a.bestStreakOverall+' · '+a.xp+' XP</span>' +
+        '</summary>' +
+        '<div class="archive-body">' +
+          (a.habits.length
+            ? ('<div style="overflow-x:auto;"><table class="lb-table"><thead><tr><th>Odat</th><th>%</th><th>Bajarildi</th><th>Rekord</th></tr></thead><tbody>'+rows+'</tbody></table></div>')
+            : '<div class="journal-empty">Bu marafonda odat bo\'lmagan.</div>') +
+        '</div>' +
+      '</details>';
+    }).join('');
+  }
+
+  function render(){
+    var calc = computeAll();
+    renderHero(calc);
+    renderEmojiRow();
+    renderGoals();
+    renderGrid(calc);
+    renderWeekly(calc);
+    renderLeaderboard(calc);
+    renderArchive();
+    renderAchievements(calc);
+    renderJournal();
+  }
+
+  // ---------- mutations ----------
+  function toggleDay(day, habitId){
+    if(!state.logs[day]) state.logs[day] = {};
+    state.logs[day][habitId] = !state.logs[day][habitId];
+    if(!state.logs[day][habitId]) delete state.logs[day][habitId];
+    render();
+    persist();
+  }
+  function addHabit(name, emoji){
+    name = name.trim();
+    if(!name) return;
+    if(state.habits.length >= HABIT_LIMIT) return;
+    var id = 'h' + Date.now().toString(36) + Math.floor(Math.random()*1000);
+    var createdDay = Math.min(Math.max(todayDayIndex() || 1, 1), 30);
+    state.habits.push({id:id, name:name, emoji:emoji, createdDay:createdDay});
+    render();
+    persist();
+  }
+  function renameHabit(id, name){
+    name = name.trim();
+    var h = state.habits.find(function(x){ return x.id===id; });
+    if(h && name) h.name = name;
+    editingHabitId = null;
+    render();
+    persist();
+  }
+  function deleteHabit(id){
+    // A habit being deleted might be feeding a goal's progress -- bank
+    // whatever it already contributed so that history isn't lost, then unlink.
+    state.goals.forEach(function(g){
+      if(g.linkedHabitId === id){
+        g.carryOverCount = (g.carryOverCount||0) + habitDoneCountInLogs(id);
+        g.linkedHabitId = null;
+      }
+    });
+    state.habits = state.habits.filter(function(h){ return h.id!==id; });
+    pendingDeleteId = null;
+    render();
+    persist();
+  }
+  function addJournal(text){
+    text = text.trim();
+    if(!text) return;
+    state.journal.push({date: todayStr, text: text});
+    render();
+    persist();
+  }
+  function resetChallenge(){
+    // Archive a summary of the ending cycle (if any days were actually
+    // tracked) before it's wiped, so past marathons aren't lost forever.
+    var calc = computeAll();
+    if(calc.tracked >= 1){
+      var habitsSummary = state.habits.map(function(h){
+        var s = calc.perHabit[h.id];
+        return { id:h.id, name:h.name, emoji:h.emoji, doneCount:s.doneCount, span:s.span, completionRate:s.completionRate, bestStreak:s.bestStreak };
+      });
+      state.archive = state.archive || [];
+      state.archive.unshift({
+        id: 'a' + Date.now().toString(36),
+        startDate: state.startDate,
+        endDate: addDays(state.startDate, 29),
+        totalDone: calc.totalDone,
+        totalPossible: calc.totalPossible,
+        overallRate: calc.overallRate,
+        perfectDays: calc.perfectDays,
+        xp: calc.xp,
+        bestStreakOverall: calc.bestStreakOverall,
+        bestStreakHabitName: calc.bestStreakHabit ? (calc.bestStreakHabit.emoji + ' ' + calc.bestStreakHabit.name) : null,
+        habits: habitsSummary
+      });
+      if(state.archive.length > 60) state.archive.length = 60;
+    }
+    // Bank each linked goal's progress from this marathon before the grid
+    // wipes, so a 3-month goal keeps accumulating across 30-day cycles.
+    state.goals.forEach(function(g){
+      if(g.linkedHabitId){
+        g.carryOverCount = (g.carryOverCount||0) + habitDoneCountInLogs(g.linkedHabitId);
+      }
+    });
+    state.startDate = todayStr;
+    state.logs = {};
+    render();
+    persist();
+  }
+
+  // ---------- goal mutations ----------
+  function addGoal(title){
+    title = title.trim();
+    if(!title) return;
+    if(state.goals.length >= GOAL_LIMIT) return;
+    var id = 'g' + Date.now().toString(36) + Math.floor(Math.random()*1000);
+    state.goals.push({id:id, title:title, note:'', monthly:['','',''], daily:[], linkedHabitId:null, targetCount:0, carryOverCount:0});
+    renderGoals();
+    persist();
+  }
+  function setGoalLink(goalId, habitId){
+    var g = state.goals.find(function(x){ return x.id===goalId; });
+    if(!g) return;
+    habitId = habitId || null;
+    if(g.linkedHabitId && g.linkedHabitId !== habitId){
+      // Switching (or clearing) the link -- bank what it already earned.
+      g.carryOverCount = (g.carryOverCount||0) + habitDoneCountInLogs(g.linkedHabitId);
+    }
+    g.linkedHabitId = habitId;
+    renderGoals();
+    persist();
+  }
+  function deleteGoal(id){
+    state.goals = state.goals.filter(function(g){ return g.id!==id; });
+    pendingDeleteGoalId = null;
+    renderGoals();
+    persist();
+  }
+  function addGoalDaily(goalId, text){
+    text = text.trim();
+    if(!text) return;
+    var g = state.goals.find(function(x){ return x.id===goalId; });
+    if(!g) return;
+    var id = 'gd' + Date.now().toString(36) + Math.floor(Math.random()*1000);
+    g.daily.push({id:id, text:text, done:false});
+    renderGoals();
+    persist();
+  }
+  function toggleGoalDaily(goalId, dailyId){
+    var g = state.goals.find(function(x){ return x.id===goalId; });
+    if(!g) return;
+    var d = g.daily.find(function(x){ return x.id===dailyId; });
+    if(d) d.done = !d.done;
+    renderGoals();
+    persist();
+  }
+  function deleteGoalDaily(goalId, dailyId){
+    var g = state.goals.find(function(x){ return x.id===goalId; });
+    if(!g) return;
+    g.daily = g.daily.filter(function(x){ return x.id!==dailyId; });
+    renderGoals();
+    persist();
+  }
+
+  // ---------- events ----------
+  document.getElementById('addHabitForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var input = document.getElementById('newHabitName');
+    addHabit(input.value, selectedEmoji);
+    input.value = '';
+  });
+  document.getElementById('emojiRow').addEventListener('click', function(e){
+    var b = e.target.closest('[data-emoji]');
+    if(!b) return;
+    selectedEmoji = b.getAttribute('data-emoji');
+    renderEmojiRow();
+  });
+  document.getElementById('goalAddForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var input = document.getElementById('newGoalTitle');
+    addGoal(input.value);
+    input.value = '';
+  });
+  document.getElementById('journalForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var ta = document.getElementById('journalText');
+    addJournal(ta.value);
+    ta.value = '';
+  });
+  var resetArmed = false;
+  document.getElementById('resetBtn').addEventListener('click', function(e){
+    var btn = e.currentTarget;
+    if(!resetArmed){
+      resetArmed = true;
+      btn.textContent = "Barcha belgilar tozalanadi — ishonchingiz komilmi? (yana bosing)";
+      setTimeout(function(){ resetArmed=false; btn.textContent='Yangi marafon boshlash'; }, 4000);
+      return;
+    }
+    resetArmed = false;
+    btn.textContent = 'Yangi marafon boshlash';
+    resetChallenge();
+  });
+
+  // Lets anyone move the whole 30-day marathon to start on any date they
+  // choose -- past or future -- without touching existing checkmarks: logs
+  // are keyed by day NUMBER (1..30), not by calendar date, so changing
+  // startDate only shifts which date each day number lands on. Unlike
+  // "Yangi marafon boshlash" above, this never archives or wipes anything.
+  document.getElementById('startDateInput').addEventListener('change', function(e){
+    var newDate = e.target.value;
+    if(!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) return;
+    if(newDate === state.startDate) return;
+    state.startDate = newDate;
+    render();
+    persist();
+    scrollToToday();
+  });
+
+  document.getElementById('gridWrap').addEventListener('click', function(e){
+    var t = e.target;
+    var toggleBtn = t.closest('[data-toggle-day]');
+    if(toggleBtn){
+      if(toggleBtn.disabled) return;
+      toggleDay(parseInt(toggleBtn.getAttribute('data-toggle-day'),10), toggleBtn.getAttribute('data-toggle-habit'));
+      return;
+    }
+    var renameStart = t.closest('[data-rename-start]');
+    if(renameStart){
+      editingHabitId = renameStart.getAttribute('data-rename-start');
+      render();
+      return;
+    }
+    var delBtn = t.closest('[data-del]');
+    if(delBtn){
+      pendingDeleteId = delBtn.getAttribute('data-del');
+      render();
+      return;
+    }
+    var confirmDel = t.closest('[data-confirm-del]');
+    if(confirmDel){ deleteHabit(confirmDel.getAttribute('data-confirm-del')); return; }
+    var cancelDel = t.closest('[data-cancel-del]');
+    if(cancelDel){ pendingDeleteId = null; render(); return; }
+  });
+  document.getElementById('gridWrap').addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && e.target.matches('[data-rename]')){
+      e.preventDefault();
+      renameHabit(e.target.getAttribute('data-rename'), e.target.value);
+    } else if(e.key === 'Escape' && e.target.matches('[data-rename]')){
+      editingHabitId = null; render();
+    }
+  });
+  document.getElementById('gridWrap').addEventListener('focusout', function(e){
+    if(e.target.matches('[data-rename]') && editingHabitId){
+      renameHabit(e.target.getAttribute('data-rename'), e.target.value);
+    }
+  });
+
+  // ---------- goals events ----------
+  document.getElementById('goalsList').addEventListener('input', function(e){
+    var t = e.target;
+    var titleId = t.matches('[data-goal-title]') ? t.getAttribute('data-goal-title') : null;
+    if(titleId){
+      var g = state.goals.find(function(x){ return x.id===titleId; });
+      if(g) g.title = t.value;
+      return;
+    }
+    var noteId = t.matches('[data-goal-note]') ? t.getAttribute('data-goal-note') : null;
+    if(noteId){
+      var g2 = state.goals.find(function(x){ return x.id===noteId; });
+      if(g2) g2.note = t.value;
+      return;
+    }
+    var monthId = t.matches('[data-goal-month]') ? t.getAttribute('data-goal-month') : null;
+    if(monthId){
+      var idx = parseInt(t.getAttribute('data-month-idx'),10);
+      var g3 = state.goals.find(function(x){ return x.id===monthId; });
+      if(g3 && g3.monthly) g3.monthly[idx] = t.value;
+      return;
+    }
+    var targetId = t.matches('[data-goal-target]') ? t.getAttribute('data-goal-target') : null;
+    if(targetId){
+      var g4 = state.goals.find(function(x){ return x.id===targetId; });
+      if(g4) g4.targetCount = parseInt(t.value,10) || 0;
+      return;
+    }
+  });
+  document.getElementById('goalsList').addEventListener('focusout', function(e){
+    var t = e.target;
+    if(t.matches('[data-goal-target]')){
+      // Re-render so the progress bar reflects the new target immediately.
+      renderGoals();
+      persist();
+      return;
+    }
+    if(t.matches('[data-goal-title],[data-goal-note],[data-goal-month]')){
+      persist();
+    }
+  });
+  document.getElementById('goalsList').addEventListener('change', function(e){
+    var toggle = e.target.closest('[data-goal-daily-toggle]');
+    if(toggle){
+      toggleGoalDaily(toggle.getAttribute('data-goal-daily-toggle'), toggle.getAttribute('data-daily-id'));
+      return;
+    }
+    var linkSel = e.target.closest('[data-goal-link]');
+    if(linkSel){
+      setGoalLink(linkSel.getAttribute('data-goal-link'), linkSel.value);
+      return;
+    }
+  });
+  document.getElementById('goalsList').addEventListener('submit', function(e){
+    var form = e.target.closest('[data-goal-daily-form]');
+    if(form){
+      e.preventDefault();
+      var goalId = form.getAttribute('data-goal-daily-form');
+      var input = form.querySelector('[data-goal-daily-input]');
+      addGoalDaily(goalId, input.value);
+    }
+  });
+  document.getElementById('goalsList').addEventListener('click', function(e){
+    var t = e.target;
+    var delGoal = t.closest('[data-del-goal]');
+    if(delGoal){ pendingDeleteGoalId = delGoal.getAttribute('data-del-goal'); renderGoals(); return; }
+    var confirmDelGoal = t.closest('[data-confirm-del-goal]');
+    if(confirmDelGoal){ deleteGoal(confirmDelGoal.getAttribute('data-confirm-del-goal')); return; }
+    var cancelDelGoal = t.closest('[data-cancel-del-goal]');
+    if(cancelDelGoal){ pendingDeleteGoalId = null; renderGoals(); return; }
+    var delDaily = t.closest('[data-goal-daily-del]');
+    if(delDaily){ deleteGoalDaily(delDaily.getAttribute('data-goal-daily-del'), delDaily.getAttribute('data-daily-id')); return; }
+  });
+
+  function scrollToToday(){
+    var wrap = document.querySelector('.grid-scroll');
+    var todayCell = document.querySelector('.col-head.today');
+    if(wrap && todayCell){
+      wrap.scrollLeft = Math.max(0, todayCell.offsetLeft - 120);
+    }
+  }
+
+  // ---------- theme (manual light/dark, defaults to auto/system) ----------
+  var THEME_KEY = 'odat-marafoni-theme';
+  function getTheme(){
+    try{ return localStorage.getItem(THEME_KEY) || 'auto'; }catch(e){ return 'auto'; }
+  }
+  function applyTheme(theme){
+    var root = document.documentElement;
+    if(theme === 'light'){ root.setAttribute('data-theme','light'); }
+    else if(theme === 'dark'){ root.setAttribute('data-theme','dark'); }
+    else { root.removeAttribute('data-theme'); }
+    var btn = document.getElementById('themeToggleBtn');
+    if(btn) btn.textContent = theme === 'light' ? '☀️' : (theme === 'dark' ? '🌙' : '🌓');
+  }
+  function cycleTheme(){
+    var order = ['auto','light','dark'];
+    var idx = order.indexOf(getTheme());
+    var next = order[(idx+1) % order.length];
+    try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
+    applyTheme(next);
+  }
+  document.getElementById('themeToggleBtn').addEventListener('click', cycleTheme);
+
+  // ---------- pomodoro / focus timer ----------
+  // A self-contained countdown timer: user sets the minutes, it counts DOWN
+  // (never up), and plays a short beep sequence via the Web Audio API when it
+  // reaches zero -- no external audio file needed, so it works offline and
+  // inside the packaged PWA with nothing extra to fetch.
+  //
+  // The countdown is driven by wall-clock timestamps (endTimestamp), not by
+  // "subtract one second per tick" -- setInterval alone drifts and can even
+  // get throttled while the tab is backgrounded, so every tick recomputes the
+  // remaining time from Date.now() instead of trusting the tick count.
+  var POMODORO_MIN_KEY = 'odat-marafoni-pomodoro-minutes';
+  var POMODORO_RING_CIRC = 2 * Math.PI * 90; // matches the r=90 circle in the SVG
+  var pomodoro = {
+    totalSeconds: 25 * 60,
+    remainingSeconds: 25 * 60,
+    running: false,
+    intervalId: null,
+    endTimestamp: null
+  };
+
+  function pomodoroLoadMinutes(){
+    try{
+      var raw = localStorage.getItem(POMODORO_MIN_KEY);
+      var min = raw ? parseInt(raw, 10) : 25;
+      if(!min || min < 1 || min > 180) min = 25;
+      return min;
+    }catch(e){ return 25; }
+  }
+  function pomodoroSaveMinutes(min){
+    try{ localStorage.setItem(POMODORO_MIN_KEY, String(min)); }catch(e){}
+  }
+  function pomodoroFormatTime(totalSec){
+    var s = Math.max(0, Math.round(totalSec));
+    var m = Math.floor(s / 60);
+    var sec = s % 60;
+    return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+  }
+  function pomodoroSetControlsEnabled(enabled){
+    document.getElementById('pomodoroMinutes').disabled = !enabled;
+    document.getElementById('pomodoroSetBtn').disabled = !enabled;
+    Array.prototype.forEach.call(document.querySelectorAll('.pomodoro-preset'), function(btn){
+      btn.disabled = !enabled;
+    });
+  }
+  function pomodoroRender(){
+    var display = document.getElementById('pomodoroTimeDisplay');
+    var ring = document.getElementById('pomodoroRingFg');
+    if(display) display.textContent = pomodoroFormatTime(pomodoro.remainingSeconds);
+    if(ring){
+      var frac = pomodoro.totalSeconds > 0 ? (pomodoro.remainingSeconds / pomodoro.totalSeconds) : 0;
+      frac = Math.max(0, Math.min(1, frac));
+      ring.style.strokeDasharray = String(POMODORO_RING_CIRC);
+      ring.style.strokeDashoffset = String(POMODORO_RING_CIRC * (1 - frac));
+      ring.classList.toggle('is-done', pomodoro.remainingSeconds <= 0);
+    }
+  }
+  function pomodoroHighlightPreset(min){
+    Array.prototype.forEach.call(document.querySelectorAll('.pomodoro-preset'), function(btn){
+      btn.setAttribute('aria-pressed', String(parseInt(btn.dataset.min, 10) === min));
+    });
+  }
+  function pomodoroSetStatus(msg){
+    var el = document.getElementById('pomodoroHint');
+    if(el) el.textContent = msg || '';
+  }
+
+  // ---- sound: everything below runs on the Web Audio API, no audio files
+  // to ship -- important both for staying offline-capable and because there
+  // are no third-party sound assets to license.
+  var pomodoroAudioCtx = null;
+  function pomodoroEnsureAudioCtx(){
+    try{
+      if(!pomodoroAudioCtx){
+        var Ctx = window.AudioContext || window.webkitAudioContext;
+        if(!Ctx) return null;
+        pomodoroAudioCtx = new Ctx();
+      }
+      if(pomodoroAudioCtx.state === 'suspended') pomodoroAudioCtx.resume();
+      return pomodoroAudioCtx;
+    }catch(e){ return null; }
+  }
+  function pomodoroPlayBeep(){
+    try{
+      var ctx = pomodoroEnsureAudioCtx();
+      if(!ctx) return;
+      var now = ctx.currentTime;
+      [0, 0.35, 0.7].forEach(function(offset){
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0, now + offset);
+        gain.gain.linearRampToValueAtTime(0.35, now + offset + 0.02);
+        gain.gain.linearRampToValueAtTime(0, now + offset + 0.28);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.3);
+      });
+    }catch(e){ /* best-effort -- some browsers block audio before a user gesture */ }
+  }
+
+  // ---- soft ambient "nature" sound (gentle rain/wind-like noise), played
+  // only while a focus session is actually running. Synthesized locally
+  // (filtered brown noise) rather than a recorded track, so there's no audio
+  // file to fetch or license -- it works offline just like the beep above.
+  //
+  // A specific song or a YouTube track can't be embedded here -- that would
+  // mean either downloading copyrighted audio (not something this app can
+  // do) or streaming from YouTube, which needs a live internet connection
+  // every time and breaks the offline-first design. What it CAN do instead:
+  // let you pick any audio file you already legally have on your own device
+  // (an MP3 you own, something you recorded) and loop that during focus
+  // sessions in place of the generated sound -- see the file-picker below.
+  var POMODORO_AMBIENT_KEY = 'odat-marafoni-pomodoro-ambient';
+  var pomodoroAmbient = { enabled: false, playing: false, source: null, gainNode: null, kind: null };
+  var pomodoroCustomTrack = { blob: null, name: null, url: null };
+  function pomodoroAmbientLoadPref(){
+    try{ return localStorage.getItem(POMODORO_AMBIENT_KEY) === '1'; }catch(e){ return false; }
+  }
+  function pomodoroAmbientSavePref(on){
+    try{ localStorage.setItem(POMODORO_AMBIENT_KEY, on ? '1' : '0'); }catch(e){}
+  }
+
+  // Generic small-value IndexedDB store, reusing the same database the daily
+  // reminder already mirrors into (see idbSetReminder above) -- this is where
+  // the uploaded music file's Blob lives, so it survives reloads and doesn't
+  // need re-uploading every time the app opens.
+  function idbPutKV(key, value){
+    return new Promise(function(resolve){
+      try{
+        var req = indexedDB.open('odat-marafoni-db', 1);
+        req.onupgradeneeded = function(){ try{ req.result.createObjectStore('kv'); }catch(e){} };
+        req.onsuccess = function(){
+          try{
+            var tx = req.result.transaction('kv', 'readwrite');
+            tx.objectStore('kv').put(value, key);
+            tx.oncomplete = function(){ resolve(true); };
+            tx.onerror = function(){ resolve(false); };
+          }catch(e){ resolve(false); }
+        };
+        req.onerror = function(){ resolve(false); };
+      }catch(e){ resolve(false); }
+    });
+  }
+  function idbGetKV(key){
+    return new Promise(function(resolve){
+      try{
+        var req = indexedDB.open('odat-marafoni-db', 1);
+        req.onupgradeneeded = function(){ try{ req.result.createObjectStore('kv'); }catch(e){} };
+        req.onsuccess = function(){
+          try{
+            var tx = req.result.transaction('kv', 'readonly');
+            var getReq = tx.objectStore('kv').get(key);
+            getReq.onsuccess = function(){ resolve(getReq.result || null); };
+            getReq.onerror = function(){ resolve(null); };
+          }catch(e){ resolve(null); }
+        };
+        req.onerror = function(){ resolve(null); };
+      }catch(e){ resolve(null); }
+    });
+  }
+  function idbDeleteKV(key){
+    return new Promise(function(resolve){
+      try{
+        var req = indexedDB.open('odat-marafoni-db', 1);
+        req.onupgradeneeded = function(){ try{ req.result.createObjectStore('kv'); }catch(e){} };
+        req.onsuccess = function(){
+          try{
+            var tx = req.result.transaction('kv', 'readwrite');
+            tx.objectStore('kv').delete(key);
+            tx.oncomplete = function(){ resolve(true); };
+            tx.onerror = function(){ resolve(false); };
+          }catch(e){ resolve(false); }
+        };
+        req.onerror = function(){ resolve(false); };
+      }catch(e){ resolve(false); }
+    });
+  }
+  function pomodoroUpdateTrackUI(){
+    var hintEl = document.getElementById('pomodoroTrackHint');
+    var removeBtn = document.getElementById('pomodoroTrackRemoveBtn');
+    if(pomodoroCustomTrack.name){
+      if(hintEl) hintEl.textContent = "Hozircha: " + pomodoroCustomTrack.name;
+      if(removeBtn) removeBtn.style.display = '';
+    } else {
+      if(hintEl) hintEl.textContent = "Hozircha: tabiat ovozi (avtomatik yaratilgan)";
+      if(removeBtn) removeBtn.style.display = 'none';
+    }
+  }
+  function pomodoroSetCustomTrack(file){
+    if(pomodoroCustomTrack.url){ try{ URL.revokeObjectURL(pomodoroCustomTrack.url); }catch(e){} }
+    pomodoroCustomTrack.blob = file;
+    pomodoroCustomTrack.name = file.name;
+    pomodoroCustomTrack.url = URL.createObjectURL(file);
+    pomodoroUpdateTrackUI();
+    idbPutKV('pomodoroTrack', { blob: file, name: file.name });
+    pomodoroSetStatus("Musiqa yuklandi: " + file.name);
+  }
+  function pomodoroRemoveCustomTrack(){
+    if(pomodoroCustomTrack.url){ try{ URL.revokeObjectURL(pomodoroCustomTrack.url); }catch(e){} }
+    pomodoroCustomTrack.blob = null;
+    pomodoroCustomTrack.name = null;
+    pomodoroCustomTrack.url = null;
+    pomodoroUpdateTrackUI();
+    idbDeleteKV('pomodoroTrack');
+    pomodoroSetStatus("Standart tabiat ovoziga qaytarildi.");
+  }
+  document.getElementById('pomodoroTrackPickBtn').addEventListener('click', function(){
+    document.getElementById('pomodoroTrackFile').click();
+  });
+  document.getElementById('pomodoroTrackFile').addEventListener('change', function(e){
+    var file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if(!file) return;
+    if(!/^audio\//.test(file.type) && !/\.(mp3|wav|ogg|m4a|aac|flac|webm)$/i.test(file.name)){
+      pomodoroSetStatus("Bu audio fayl emasga o'xshaydi -- mp3/wav/ogg kabi audio fayl tanlang.");
+      return;
+    }
+    if(file.size > 30 * 1024 * 1024){
+      pomodoroSetStatus("Fayl juda katta (30 MB dan kichik audio fayl tanlang).");
+      return;
+    }
+    pomodoroSetCustomTrack(file);
+  });
+  document.getElementById('pomodoroTrackRemoveBtn').addEventListener('click', pomodoroRemoveCustomTrack);
+  function pomodoroBuildNoiseBuffer(ctx){
+    var seconds = 6;
+    var bufferSize = Math.floor(ctx.sampleRate * seconds);
+    var buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    var data = buffer.getChannelData(0);
+    var lastOut = 0;
+    for(var i = 0; i < bufferSize; i++){
+      var white = Math.random() * 2 - 1;
+      // Leaky integration turns flat white noise into deeper, softer "brown"
+      // noise -- much closer to gentle rain/wind than a harsh hiss.
+      lastOut = (lastOut + 0.02 * white) / 1.02;
+      data[i] = lastOut * 3.2;
+    }
+    // Fade the first/last ~80ms so the seamless loop doesn't click at the seam.
+    var fadeSamples = Math.floor(ctx.sampleRate * 0.08);
+    for(var f = 0; f < fadeSamples; f++){
+      var mul = f / fadeSamples;
+      data[f] *= mul;
+      data[bufferSize - 1 - f] *= mul;
+    }
+    return buffer;
+  }
+  function pomodoroAmbientStartCustom(ctx){
+    try{
+      var audioEl = new Audio(pomodoroCustomTrack.url);
+      audioEl.loop = true;
+      var mediaSource = ctx.createMediaElementSource(audioEl);
+      var gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 1.2);
+      mediaSource.connect(gain);
+      gain.connect(ctx.destination);
+      var playPromise = audioEl.play();
+      if(playPromise && typeof playPromise.catch === 'function') playPromise.catch(function(){});
+      pomodoroAmbient.source = audioEl;
+      pomodoroAmbient.gainNode = gain;
+      pomodoroAmbient.kind = 'custom';
+      pomodoroAmbient.playing = true;
+      return true;
+    }catch(e){ return false; }
+  }
+  function pomodoroAmbientStartNoise(ctx){
+    try{
+      var source = ctx.createBufferSource();
+      source.buffer = pomodoroBuildNoiseBuffer(ctx);
+      source.loop = true;
+      var filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 700;
+      var gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 1.2);
+      source.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      source.start();
+      pomodoroAmbient.source = source;
+      pomodoroAmbient.gainNode = gain;
+      pomodoroAmbient.kind = 'noise';
+      pomodoroAmbient.playing = true;
+      return true;
+    }catch(e){ return false; }
+  }
+  function pomodoroAmbientStart(){
+    if(pomodoroAmbient.playing) return;
+    var ctx = pomodoroEnsureAudioCtx();
+    if(!ctx) return;
+    if(pomodoroCustomTrack.url && pomodoroAmbientStartCustom(ctx)) return;
+    pomodoroAmbientStartNoise(ctx);
+  }
+  function pomodoroAmbientStop(){
+    if(!pomodoroAmbient.playing) return;
+    var kind = pomodoroAmbient.kind;
+    try{
+      var ctx = pomodoroAudioCtx;
+      var gain = pomodoroAmbient.gainNode;
+      var source = pomodoroAmbient.source;
+      if(ctx && gain){
+        var now = ctx.currentTime;
+        gain.gain.cancelScheduledValues(now);
+        gain.gain.setValueAtTime(gain.gain.value, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.4);
+      }
+      if(source){
+        if(kind === 'custom'){
+          setTimeout(function(){ try{ source.pause(); source.currentTime = 0; }catch(e3){} }, 420);
+        } else {
+          try{ source.stop(ctx ? ctx.currentTime + 0.45 : undefined); }catch(e2){}
+        }
+      }
+    }catch(e){ /* best-effort */ }
+    pomodoroAmbient.source = null;
+    pomodoroAmbient.gainNode = null;
+    pomodoroAmbient.kind = null;
+    pomodoroAmbient.playing = false;
+  }
+  document.getElementById('pomodoroAmbientToggle').addEventListener('change', function(e){
+    pomodoroAmbient.enabled = e.target.checked;
+    pomodoroAmbientSavePref(pomodoroAmbient.enabled);
+    if(pomodoroAmbient.enabled && pomodoro.running){
+      pomodoroAmbientStart();
+    } else {
+      pomodoroAmbientStop();
+    }
+  });
+
+  function pomodoroSetMinutes(min){
+    min = parseInt(min, 10);
+    if(!min || min < 1) min = 1;
+    if(min > 180) min = 180;
+    pomodoroPause();
+    pomodoro.totalSeconds = min * 60;
+    pomodoro.remainingSeconds = min * 60;
+    pomodoroRender();
+    pomodoroSaveMinutes(min);
+    document.getElementById('pomodoroMinutes').value = min;
+    pomodoroHighlightPreset(min);
+    pomodoroSetStatus('');
+  }
+  function pomodoroTick(){
+    if(!pomodoro.running) return;
+    var remainingMs = pomodoro.endTimestamp - Date.now();
+    pomodoro.remainingSeconds = remainingMs / 1000;
+    if(pomodoro.remainingSeconds <= 0){
+      pomodoro.remainingSeconds = 0;
+      pomodoroRender();
+      pomodoroFinish();
+      return;
+    }
+    pomodoroRender();
+  }
+  function pomodoroStart(){
+    if(pomodoro.running) return;
+    if(pomodoro.remainingSeconds <= 0) pomodoro.remainingSeconds = pomodoro.totalSeconds;
+    pomodoro.endTimestamp = Date.now() + pomodoro.remainingSeconds * 1000;
+    pomodoro.running = true;
+    if(pomodoro.intervalId) clearInterval(pomodoro.intervalId);
+    pomodoro.intervalId = setInterval(pomodoroTick, 250);
+    document.getElementById('pomodoroStartBtn').style.display = 'none';
+    document.getElementById('pomodoroPauseBtn').style.display = '';
+    pomodoroSetControlsEnabled(false);
+    pomodoroSetStatus('');
+    if(pomodoroAmbient.enabled) pomodoroAmbientStart();
+    pomodoroTick();
+  }
+  function pomodoroPause(){
+    if(pomodoro.intervalId){ clearInterval(pomodoro.intervalId); pomodoro.intervalId = null; }
+    if(pomodoro.running && pomodoro.endTimestamp){
+      pomodoro.remainingSeconds = Math.max(0, (pomodoro.endTimestamp - Date.now()) / 1000);
+    }
+    pomodoro.running = false;
+    document.getElementById('pomodoroStartBtn').style.display = '';
+    document.getElementById('pomodoroPauseBtn').style.display = 'none';
+    pomodoroSetControlsEnabled(true);
+    pomodoroAmbientStop();
+  }
+  function pomodoroReset(){
+    pomodoroPause();
+    pomodoro.remainingSeconds = pomodoro.totalSeconds;
+    pomodoroRender();
+    pomodoroSetStatus('');
+  }
+  function pomodoroFinish(){
+    pomodoroPause();
+    pomodoroPlayBeep();
+    pomodoroSetStatus("Vaqt tugadi! 🎉");
+    // Best-effort system notification too, reusing whatever permission the
+    // daily reminder already has -- if it's granted, this also shows even
+    // when this tab is in the background; if not, the beep above still fires
+    // as long as the tab itself is open.
+    if('Notification' in window && Notification.permission === 'granted'){
+      try{
+        if('serviceWorker' in navigator){
+          navigator.serviceWorker.ready.then(function(reg){
+            reg.showNotification('🍅 Vaqt tugadi!', { body: 'Fokus vaqti tugadi -- biroz dam oling.', icon: 'icon-192.png', badge: 'icon-192.png' });
+          }).catch(function(){
+            try{ new Notification('🍅 Vaqt tugadi!', { body: 'Fokus vaqti tugadi -- biroz dam oling.' }); }catch(e){}
+          });
+        } else {
+          new Notification('🍅 Vaqt tugadi!', { body: 'Fokus vaqti tugadi -- biroz dam oling.' });
+        }
+      }catch(e){}
+    }
+    pomodoro.remainingSeconds = pomodoro.totalSeconds;
+    pomodoroRender();
+  }
+
+  document.getElementById('pomodoroStartBtn').addEventListener('click', pomodoroStart);
+  document.getElementById('pomodoroPauseBtn').addEventListener('click', pomodoroPause);
+  document.getElementById('pomodoroResetBtn').addEventListener('click', pomodoroReset);
+  document.getElementById('pomodoroSetBtn').addEventListener('click', function(){
+    pomodoroSetMinutes(document.getElementById('pomodoroMinutes').value);
+  });
+  document.getElementById('pomodoroMinutes').addEventListener('change', function(e){
+    pomodoroSetMinutes(e.target.value);
+  });
+  document.getElementById('pomodoroPresets').addEventListener('click', function(e){
+    var btn = e.target.closest('.pomodoro-preset');
+    if(!btn || btn.disabled) return;
+    pomodoroSetMinutes(btn.dataset.min);
+  });
+
+  // ---------- daily reminder ----------
+  // Best-effort only: this can fire while the app/tab is open (or briefly
+  // backgrounded), but a plain client-side page has no server to push
+  // notifications when the app is fully closed -- that would need a real
+  // backend. The settings hint below says this plainly to the user.
+  var reminderTimer = null;
+
+  // Status is written into the visible hint paragraph rather than alert()
+  // popups -- some mobile/PWA contexts handle alert() inconsistently, and a
+  // persistent on-screen message is easier to read, screenshot and report
+  // back than a dialog that's already gone.
+  function setReminderStatus(msg, isError){
+    var el = document.getElementById('reminderHint');
+    if(!el) return;
+    el.textContent = msg;
+    el.style.color = isError ? 'var(--danger)' : 'var(--ink-dim)';
+  }
+  function updateReminderHint(){
+    if(state.reminder && state.reminder.enabled){
+      setReminderStatus("Yoqilgan: har kuni soat " + (state.reminder.time||'20:00') + " da eslatma yuboriladi. Bu faqat dastur biror vaqt ochiq/fonda ishlagan yoki qurilma fon rejimida tekshirishga ruxsat bergan bo'lsa ishlaydi -- hech qanday veb-ilova telefon butunlay o'chiq/internet uzilgan holatda kafolatlangan bildirishnoma yubora olmaydi, buning uchun maxsus server kerak bo'ladi.");
+    } else {
+      setReminderStatus("Yoqilsa, belgilangan vaqtda \"Odatlaringizni bajardingizmi?\" degan eslatma yuboriladi.");
+    }
+  }
+  function fireReminderNotification(){
+    var body = "Bugungi odatlaringizni belgilashni unutmang!";
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.ready.then(function(reg){
+        reg.showNotification('🏁 Odat Marafoni', { body: body, icon: 'icon-192.png', badge: 'icon-192.png' });
+      }).catch(function(){
+        try{ new Notification('🏁 Odat Marafoni', { body: body, icon: 'icon-192.png' }); }catch(e){}
+      });
+    } else {
+      try{ new Notification('🏁 Odat Marafoni', { body: body, icon: 'icon-192.png' }); }catch(e){}
+    }
+  }
+  function checkReminder(){
+    if(!state.reminder || !state.reminder.enabled) return;
+    if(!('Notification' in window) || Notification.permission !== 'granted') return;
+    var now = new Date();
+    var hh = String(now.getHours()).padStart(2,'0');
+    var mm = String(now.getMinutes()).padStart(2,'0');
+    var today = todayISO();
+    if((hh+':'+mm) >= (state.reminder.time||'20:00') && state.reminder.lastFiredDate !== today){
+      fireReminderNotification();
+      state.reminder.lastFiredDate = today;
+      persist();
+    }
+  }
+  function scheduleReminderCheck(){
+    if(reminderTimer) clearInterval(reminderTimer);
+    reminderTimer = setInterval(checkReminder, 60000);
+    checkReminder();
+  }
+
+  // ---------- periodic background sync (best-effort "app not open" check) ----------
+  // Chrome can wake the service worker in the background on its own schedule
+  // (NOT an exact time -- it's throttled by battery/network/engagement, and
+  // only available for an installed PWA on Android Chrome; Safari/iOS and
+  // Firefox don't support it at all). It's the closest a page with no server
+  // can get to "reminder when the app isn't open". It is never a substitute
+  // for real push notifications, which need a backend this app doesn't have.
+  var PERIODIC_SYNC_TAG = 'daily-reminder-check';
+  function periodicSyncSupported(){
+    return 'serviceWorker' in navigator && 'periodicSync' in (window.ServiceWorkerRegistration ? window.ServiceWorkerRegistration.prototype : {});
+  }
+  function registerPeriodicSync(){
+    if(!periodicSyncSupported()) return Promise.resolve(false);
+    return navigator.serviceWorker.ready.then(function(reg){
+      if(!reg.periodicSync) return false;
+      if(!navigator.permissions || !navigator.permissions.query) return false;
+      return navigator.permissions.query({ name:'periodic-background-sync' }).then(function(status){
+        if(status.state !== 'granted') return false;
+        return reg.periodicSync.register(PERIODIC_SYNC_TAG, { minInterval: 6*60*60*1000 })
+          .then(function(){ return true; }).catch(function(){ return false; });
+      }).catch(function(){ return false; });
+    }).catch(function(){ return false; });
+  }
+  function unregisterPeriodicSync(){
+    if(!periodicSyncSupported()) return;
+    navigator.serviceWorker.ready.then(function(reg){
+      if(reg.periodicSync) reg.periodicSync.unregister(PERIODIC_SYNC_TAG).catch(function(){});
+    }).catch(function(){});
+  }
+
+  // ---------- push notifications (works even when the app is fully closed) ----------
+  // Unlike the in-page reminder above (which only runs while a tab/service-worker
+  // is alive to run its timer), this uses the browser's real Web Push mechanism:
+  // the page subscribes once through a small backend server (see the
+  // push-server/ folder you were given), and from then on the browser's own
+  // push service wakes this app's service worker and shows the notification
+  // even with the tab, the browser, and the phone screen all closed -- no
+  // in-page timer or periodic-sync guesswork needed.
+  //
+  // PUSH_SHARED_SECRET is only mild abuse-deterrence (stops a random visitor's
+  // browser from spamming your server's /subscribe endpoint) -- NOT real
+  // security, since this file is public and anyone can read the value out of
+  // it. Never reuse this string anywhere that needs real protection.
+  var PUSH_SHARED_SECRET = 'VuhxntuO792f_xRUjotadyj48RIpoWYu';
+
+  function setPushStatus(msg, isError){
+    var el = document.getElementById('pushHint');
+    if(!el) return;
+    el.textContent = msg;
+    el.style.color = isError ? 'var(--danger)' : 'var(--ink-dim)';
+  }
+  function updatePushHint(){
+    if(state.push && state.push.subscribed){
+      setPushStatus("Yoqilgan: bu qurilma push-serverga ulangan -- eslatma ilova to'liq yopiq bo'lsa ham keladi.");
+    } else {
+      setPushStatus("Push-server manzilini kiriting va \"Ulash va yoqish\"ni bosing -- shunda eslatma ilova yopiq yoki telefon ekrani o'chiq bo'lsa ham keladi. (push-server/ papkasidagi qo'llanmaga qarang)");
+    }
+  }
+  function urlBase64ToUint8Array(base64String){
+    var padding = '='.repeat((4 - base64String.length % 4) % 4);
+    var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    var rawData = window.atob(base64);
+    var outputArray = new Uint8Array(rawData.length);
+    for(var i=0; i<rawData.length; ++i){ outputArray[i] = rawData.charCodeAt(i); }
+    return outputArray;
+  }
+  function normalizeServerUrl(url){
+    return (url || '').trim().replace(/\/+$/, '');
+  }
+  function pushSubscribe(){
+    var urlInput = document.getElementById('pushServerUrl');
+    var serverUrl = normalizeServerUrl(urlInput.value);
+    if(!serverUrl){
+      setPushStatus("Avval push-server manzilini kiriting.", true);
+      return;
+    }
+    if(!/^https:\/\//.test(serverUrl)){
+      setPushStatus("Manzil https:// bilan boshlanishi kerak.", true);
+      return;
+    }
+    if(!('serviceWorker' in navigator) || !('PushManager' in window)){
+      setPushStatus("Bu brauzer push-bildirishnomalarni qo'llab-quvvatlamaydi.", true);
+      return;
+    }
+    if(window.self !== window.top){
+      setPushStatus("Bu yerda (Claude ichida ko'rish rejimida) push-serverga ulanib bo'lmaydi -- ilovani telefoningizga o'rnating yoki havolani to'g'ridan-to'g'ri brauzerda oching.", true);
+      return;
+    }
+    setPushStatus("Ulanmoqda...");
+    var vapidPublicKey;
+    fetch(serverUrl + '/vapid-public-key')
+      .then(function(res){
+        if(!res.ok) throw new Error('server javob bermadi (' + res.status + ')');
+        return res.json();
+      })
+      .then(function(data){
+        vapidPublicKey = data.publicKey;
+        if(!vapidPublicKey) throw new Error('VAPID kalit topilmadi');
+        return navigator.serviceWorker.ready;
+      })
+      .then(function(reg){
+        return reg.pushManager.getSubscription().then(function(existing){
+          if(existing) return existing;
+          return reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+          });
+        });
+      })
+      .then(function(subscription){
+        var timezone = 'Asia/Tashkent';
+        try{ timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || timezone; }catch(e){}
+        return fetch(serverUrl + '/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-push-key': PUSH_SHARED_SECRET },
+          body: JSON.stringify({
+            subscription: subscription.toJSON ? subscription.toJSON() : subscription,
+            timezone: timezone,
+            time: (state.reminder && state.reminder.time) || '20:00'
+          })
+        });
+      })
+      .then(function(res){
+        if(!res.ok){
+          return res.json().catch(function(){ return {}; }).then(function(body){
+            throw new Error(body.error || ('server xato qaytardi (' + res.status + ')'));
+          });
+        }
+        state.push.serverUrl = serverUrl;
+        state.push.subscribed = true;
+        persist();
+        updatePushHint();
+      })
+      .catch(function(err){
+        setPushStatus("Ulanmadi: " + (err && err.message ? err.message : err), true);
+      });
+  }
+  function pushUnsubscribe(){
+    if(!('serviceWorker' in navigator)){
+      state.push.subscribed = false;
+      persist();
+      updatePushHint();
+      return;
+    }
+    setPushStatus("O'chirilmoqda...");
+    navigator.serviceWorker.ready.then(function(reg){
+      return reg.pushManager.getSubscription();
+    }).then(function(subscription){
+      var serverUrl = normalizeServerUrl(state.push.serverUrl || document.getElementById('pushServerUrl').value);
+      var unsubFromServer = Promise.resolve();
+      if(subscription && serverUrl){
+        unsubFromServer = fetch(serverUrl + '/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-push-key': PUSH_SHARED_SECRET },
+          body: JSON.stringify({ endpoint: subscription.endpoint })
+        }).catch(function(){ /* best-effort -- still unsubscribe locally below */ });
+      }
+      return unsubFromServer.then(function(){
+        return subscription ? subscription.unsubscribe() : true;
+      });
+    }).then(function(){
+      state.push.subscribed = false;
+      persist();
+      setPushStatus("O'chirildi.");
+    }).catch(function(err){
+      state.push.subscribed = false;
+      persist();
+      setPushStatus("Mahalliy ravishda o'chirildi (serverdan o'chirishda xatolik bo'lgan bo'lishi mumkin): " + (err && err.message ? err.message : err), true);
+    });
+  }
+  document.getElementById('pushEnableBtn').addEventListener('click', pushSubscribe);
+  document.getElementById('pushDisableBtn').addEventListener('click', pushUnsubscribe);
+
+  document.getElementById('reminderToggle').addEventListener('change', function(e){
+    var checkbox = e.target;
+    if(!checkbox.checked){
+      state.reminder.enabled = false;
+      persist();
+      updateReminderHint();
+      unregisterPeriodicSync();
+      return;
+    }
+    if(!('Notification' in window)){
+      setReminderStatus("Bu brauzer bildirishnomalarni qo'llab-quvvatlamaydi.", true);
+      checkbox.checked = false;
+      return;
+    }
+    // Chrome (and others) refuse Notification.requestPermission() outright
+    // -- throwing synchronously, not rejecting -- when the page is running
+    // inside a cross-origin iframe, which is exactly how this page looks
+    // while previewed inside Claude, before it's installed. Without this
+    // guard that throw was silent and left the checkbox stuck in a
+    // "checked but not working" state. Once installed to the home screen /
+    // opened directly in the browser, the page is top-level and this works.
+    if(window.self !== window.top){
+      setReminderStatus("Bildirishnoma ruxsatini shu yerda (Claude ichida ko'rish rejimida) so'rab bo'lmaydi — bu brauzerning xavfsizlik cheklovi. Ilovani telefoningizga o'rnatib yoki havolani to'g'ridan-to'g'ri Chrome'da ochib, o'sha yerdan yoqib ko'ring.", true);
+      checkbox.checked = false;
+      return;
+    }
+    // Once denied, browsers never show the prompt again -- requestPermission()
+    // just silently re-resolves "denied" with no dialog at all, which reads
+    // exactly like "the button does nothing" on repeated taps.
+    if(Notification.permission === 'denied'){
+      setReminderStatus("Bildirishnoma oldin rad etilgan, shuning uchun brauzer uni qayta so'ramaydi (hech qanday oyna chiqmaydi). Yoqish uchun: manzil satridagi 🔒 yoki ⓘ belgisini bosing → Bildirishnomalar (Notifications) → Ruxsat berish (Allow), so'ng shu tugmani qaytadan bosing.", true);
+      checkbox.checked = false;
+      return;
+    }
+    function onGranted(perm){
+      if(perm === 'granted'){
+        state.reminder.enabled = true;
+        persist();
+        registerPeriodicSync().then(function(gotBg){
+          if(gotBg){
+            setReminderStatus("Yoqildi: har kuni soat " + (state.reminder.time||'20:00') + " da eslatma yuboriladi. Fon rejimida tekshirish ham yoqildi (ilova yopiq bo'lsa ham vaqti-vaqti bilan tekshiriladi, lekin aniq soatda kelishi kafolatlanmaydi).");
+          } else {
+            updateReminderHint();
+          }
+        });
+        scheduleReminderCheck();
+      } else {
+        checkbox.checked = false;
+        setReminderStatus("Bildirishnoma uchun ruxsat berilmadi.", true);
+      }
+    }
+    function onError(err){
+      checkbox.checked = false;
+      setReminderStatus("Bildirishnoma ruxsatini so'rashda xatolik: " + (err && err.message ? err.message : err), true);
+    }
+    try{
+      Notification.requestPermission().then(onGranted, onError);
+    }catch(err){
+      onError(err);
+    }
+  });
+  document.getElementById('reminderTime').addEventListener('change', function(e){
+    state.reminder.time = e.target.value || '20:00';
+    persist();
+    updateReminderHint();
+    // Keep the push server's copy of the reminder time in sync too, so a
+    // closed-app notification arrives at the newly chosen time as well.
+    if(state.push && state.push.subscribed && state.push.serverUrl){
+      document.getElementById('pushServerUrl').value = state.push.serverUrl;
+      pushSubscribe();
+    }
+  });
+
+  // ---------- backup / restore ----------
+  // Two save paths: inside the Claude artifact viewer, a plain <a download>
+  // click does nothing (the frame isn't granted that permission) -- the
+  // `downloads` capability is the real way to hand the viewer a file there.
+  // Opened as a standalone installed app (the normal way this page is meant
+  // to be used), window.claude doesn't exist at all, so it falls back to the
+  // ordinary browser download, which works fine outside that sandboxed frame.
+  function exportBackupPlain(filename, json){
+    try{
+      var blob = new Blob([json], {type:'application/json'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    }catch(e){ alert("Zaxira nusxa yaratib bo'lmadi: " + (e && e.message ? e.message : e)); }
+  }
+  function exportBackup(){
+    var filename = 'odat-marafoni-zaxira-' + todayStr + '.json';
+    var json = JSON.stringify(state, null, 2);
+    if(window.claude && typeof window.claude.use === 'function'){
+      window.claude.use('downloads').then(function(downloads){
+        if(!downloads){ exportBackupPlain(filename, json); return; }
+        downloads.save({ filename: filename, data: new Blob([json], {type:'application/json'}) })
+          .catch(function(err){
+            if(err && err.code === 'declined') return;
+            exportBackupPlain(filename, json);
+          });
+      }).catch(function(){ exportBackupPlain(filename, json); });
+    } else {
+      exportBackupPlain(filename, json);
+    }
+  }
+  function importBackupFile(file){
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var parsed = JSON.parse(reader.result);
+        if(!window.confirm("Joriy barcha ma'lumot ushbu fayldagi bilan almashtiriladi. Davom etasizmi?")) return;
+        state = normalizeState(parsed);
+        render();
+        persist();
+        document.getElementById('reminderToggle').checked = !!(state.reminder && state.reminder.enabled);
+        document.getElementById('reminderTime').value = (state.reminder && state.reminder.time) || '20:00';
+        updateReminderHint();
+        document.getElementById('pushServerUrl').value = (state.push && state.push.serverUrl) || '';
+        updatePushHint();
+        alert('Zaxira nusxadan muvaffaqiyatli tiklandi.');
+      }catch(e){
+        alert("Faylni o'qib bo'lmadi -- format noto'g'ri. (" + (e && e.message ? e.message : e) + ")");
+      }
+    };
+    reader.readAsText(file);
+  }
+  document.getElementById('exportBtn').addEventListener('click', exportBackup);
+  document.getElementById('importBtn').addEventListener('click', function(){
+    document.getElementById('restoreFile').click();
+  });
+  document.getElementById('restoreFile').addEventListener('change', function(e){
+    importBackupFile(e.target.files && e.target.files[0]);
+    e.target.value = '';
+  });
+
+  // ---------- installability (Android "Add to Home screen" / Install app) ----------
+  var deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    try{
+      if(!localStorage.getItem('odat-marafoni-install-dismissed')){
+        document.getElementById('installBar').classList.add('show');
+      }
+    }catch(err){}
+  });
+  document.getElementById('installBtn').addEventListener('click', function(){
+    document.getElementById('installBar').classList.remove('show');
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt = null;
+    }
+  });
+  document.getElementById('installDismissBtn').addEventListener('click', function(){
+    document.getElementById('installBar').classList.remove('show');
+    try{ localStorage.setItem('odat-marafoni-install-dismissed', '1'); }catch(err){}
+  });
+  window.addEventListener('appinstalled', function(){
+    document.getElementById('installBar').classList.remove('show');
+  });
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(err){ console.warn('Service worker ro\'yxatdan o\'tmadi', err); });
+    });
+  }
+
+  // ---------- boot ----------
+  function boot(){
+    render();
+    scrollToToday();
+    applyTheme(getTheme());
+    (function(){
+      var savedMin = pomodoroLoadMinutes();
+      pomodoro.totalSeconds = savedMin * 60;
+      pomodoro.remainingSeconds = savedMin * 60;
+      document.getElementById('pomodoroMinutes').value = savedMin;
+      pomodoroHighlightPreset(savedMin);
+      pomodoroRender();
+      pomodoroAmbient.enabled = pomodoroAmbientLoadPref();
+      document.getElementById('pomodoroAmbientToggle').checked = pomodoroAmbient.enabled;
+      idbGetKV('pomodoroTrack').then(function(rec){
+        if(rec && rec.blob){
+          pomodoroCustomTrack.blob = rec.blob;
+          pomodoroCustomTrack.name = rec.name || "musiqa fayli";
+          pomodoroCustomTrack.url = URL.createObjectURL(rec.blob);
+          pomodoroUpdateTrackUI();
+        }
+      }).catch(function(){});
+    })();
+    document.getElementById('reminderToggle').checked = !!(state.reminder && state.reminder.enabled);
+    document.getElementById('reminderTime').value = (state.reminder && state.reminder.time) || '20:00';
+    updateReminderHint();
+    document.getElementById('pushServerUrl').value = (state.push && state.push.serverUrl) || '';
+    updatePushHint();
+    idbSetReminder(state.reminder);
+    if(state.reminder && state.reminder.enabled){
+      scheduleReminderCheck();
+      // Re-assert the periodic-sync registration each load (best-effort;
+      // browsers can drop it, and permission may have been granted since
+      // the last visit).
+      registerPeriodicSync();
+    }
+  }
+
+  (function init(){
+    state = loadLocal() || seedState(todayStr);
+    boot();
+  })();
+})();
+</script>
+</body>
+</html>
