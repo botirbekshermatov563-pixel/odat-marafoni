@@ -59,5 +59,7 @@ If this backend is ever ported off Cloudflare Workers to a Node runtime, the sta
 ## Conventions
 
 - No build tooling anywhere in `app/` — edit `index.html`/`sw.js` directly, no transpile/bundle step.
-- `sw.js`'s `CACHE_NAME` (`odat-marafoni-v3`) must be bumped whenever cached asset contents change, or returning visitors keep the stale cache.
+- Visual design ("The Zij Sky": lapis night, brass stars, sky chart) is documented in `DESIGN.md`; product context is in `PRODUCT.md`. Keep new UI inside that system: one rosette star shape, drawn SVG icons from the `<symbol>` sprite at the top of `<body>` (no emoji as UI icons), tokens from the `:root` custom properties.
+- The hero renders a generated SVG sky (`skySvg()` in `index.html`) with two layouts (wide / phone) chosen by the container width.
+- `sw.js`'s `CACHE_NAME` (`odat-marafoni-v4`) must be bumped whenever cached asset contents change, or returning visitors keep the stale cache.
 - Keep `PUSH_SHARED_SECRET` in `index.html` and `SHARED_SECRET` (the Worker secret set via `wrangler secret put`) equal — they're compared directly, no hashing.

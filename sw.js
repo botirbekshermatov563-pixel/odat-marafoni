@@ -2,7 +2,7 @@
 // Strategy: stale-while-revalidate. Serve instantly from cache when available
 // (so the app opens offline / on a flaky connection), and refresh the cache
 // in the background from the network for next time.
-var CACHE_NAME = 'odat-marafoni-v3';
+var CACHE_NAME = 'odat-marafoni-v4';
 var CORE_ASSETS = ['index.html', 'manifest.json', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 
 self.addEventListener('install', function(event){
