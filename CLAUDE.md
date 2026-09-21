@@ -4,26 +4,28 @@
 
 ## Layout
 
-This git repo is the `app/` half of a two-part project. The sibling `push-server/` folder (one level up, outside this repo) is a separate Cloudflare Worker deployed independently via `wrangler`, not via git.
+This git repo (`odat-marafoni`) is the `app/` half of a two-part project. The sibling `push-server/` folder (one level up) is a **separate git repo** (`odat-marafoni-push-server`) holding a Cloudflare Worker that is deployed independently via `wrangler`, not via git. The parent `odat-marafoni-deploy/` folder is not a repo — it only groups the two and holds a setup guide.
 
 ```
-odat-marafoni-deploy/
-├── app/                  <- this repo (deployed to GitHub Pages)
-│   ├── index.html        single-file app: markup + CSS + JS, all inline
-│   ├── sw.js             service worker (offline cache + push handling)
-│   ├── manifest.json     PWA manifest
+odat-marafoni-deploy/                  <- plain folder, not a git repo
+├── README-OZBEKCHA.txt                end-user setup walkthrough (Uzbek); contains real secret values -- keep it out of git
+├── app/                               <- this repo (deployed to GitHub Pages)
+│   ├── index.html                     single-file app: markup + CSS + JS, all inline
+│   ├── sw.js                          service worker (offline cache + push handling)
+│   ├── manifest.json                  PWA manifest
 │   └── icon-*.png
-└── push-server/          <- NOT a git repo; deployed with `npx wrangler deploy`
-    ├── worker.js         Cloudflare Worker: push-notification backend
+└── push-server/                       <- its own repo; deployed with `npx wrangler deploy`
+    ├── CLAUDE.md                      detailed push-server docs (read this before touching the Worker)
+    ├── worker.js                      Cloudflare Worker: push-notification backend
     ├── wrangler.toml
     └── package.json
 ```
 
 Deploys are independent and manual:
 - `app/` → push to `origin main` → GitHub Pages picks it up.
-- `push-server/` → `cd push-server && npx wrangler deploy` (only needed when `worker.js` changes).
+- `push-server/` → `cd push-server && npx wrangler deploy` (only needed when `worker.js` / `wrangler.toml` change). Pushing that repo to GitHub only stores the source; it does not deploy.
 
-There is no CI linking the two. See `../README-OZBEKCHA.txt` for the full end-user setup walkthrough (in Uzbek).
+There is no CI linking the two.
 
 ## app/index.html
 
@@ -44,17 +46,18 @@ Stale-while-revalidate cache for offline use, plus:
 
 ## push-server/worker.js — Cloudflare Worker
 
-Stateless HTTP + cron backend. Subscribers (endpoint, keys, timezone, reminder time, `lastFiredDate`) are stored as one JSON blob in a KV namespace (`PUSH_KV`).
+Full details live in `../push-server/CLAUDE.md`; the short version:
 
-Endpoints: `GET /health`, `GET /vapid-public-key`, `POST /subscribe`, `POST /unsubscribe`, `GET /debug-status`, `POST /debug-run-now` (all mutating/debug routes gated by `x-push-key` == `SHARED_SECRET`). `scheduled()` runs every minute via the cron trigger in `wrangler.toml` and calls `checkAndSendReminders()`, which walks every subscriber, computes their local time via `Intl.DateTimeFormat`, and sends a push only to the ones actually due (and not already fired today).
+- Stateless HTTP + cron backend. Subscribers (endpoint, keys, timezone, reminder time, `lastFiredDate`) are stored as one JSON blob in a KV namespace (`PUSH_KV`).
+- Endpoints: `GET /health`, `GET /vapid-public-key`, `POST /subscribe`, `POST /unsubscribe`, `GET /debug-status`, `POST /debug-run-now` (subscribe/unsubscribe/debug routes gated by `x-push-key` == `SHARED_SECRET`).
+- `scheduled()` runs every minute (cron in `wrangler.toml`), computes each subscriber's local time via `Intl.DateTimeFormat`, and pushes only to those who are due and haven't fired today. Dead subscriptions (HTTP 404/410) are removed.
+- This file's side of the contract: `pushSubscribe()` fetches `/vapid-public-key`, subscribes via the Push API, then POSTs `{subscription, timezone, time}` to `/subscribe`; changing the reminder time re-POSTs it. Keep route names, the `x-push-key` header and body shapes in sync with the Worker.
 
 ### Why `@block65/webcrypto-web-push` instead of the standard `web-push` library
 
-The obvious choice for sending Web Push from Node is the `web-push` npm package, but **it does not run on Cloudflare Workers**. It builds VAPID JWTs and encrypts payloads using Node's `crypto` module and other Node-only APIs (streams, `http`/`https` agents) that the Workers runtime doesn't provide — importing it throws/fails in that environment even with `nodejs_compat` on.
+The usual way to send Web Push is the `web-push` npm package, but it is built for Node (Node `crypto`/`https`) and **did not work on Cloudflare Workers**, so the Worker was migrated to `@block65/webcrypto-web-push`. That library does the same job (VAPID JWT signing + RFC 8291 payload encryption) with only the standard Web Crypto API (`crypto.subtle`), which Workers provides natively. It only *builds* the request: `worker.js` calls `buildPushPayload(message, subscription, vapid)` and sends the result with a plain `fetch(endpoint, payload)` instead of `webpush.sendNotification(...)`.
 
-`@block65/webcrypto-web-push` implements the same Web Push protocol (VAPID JWT signing + RFC 8291 payload encryption) using only the standard **Web Crypto API** (`crypto.subtle`), which Workers *does* support natively. That's the entire reason `worker.js` calls `buildPushPayload(message, subscription, vapid)` and does a plain `fetch(endpoint, payload)` to the push service, instead of `webpush.sendNotification(...)` — there is no server-side push library that works unmodified on Workers other than a webcrypto-based one like this.
-
-If this backend is ever ported off Cloudflare Workers to a Node runtime, the standard `web-push` library becomes a viable (arguably simpler) option again — but as long as it targets Workers, it must stay on a webcrypto-based implementation.
+Don't reintroduce `web-push` while the backend targets Workers. (It would become viable again on a Node runtime.)
 
 ## Conventions
 
@@ -63,3 +66,4 @@ If this backend is ever ported off Cloudflare Workers to a Node runtime, the sta
 - The hero renders a generated SVG sky (`skySvg()` in `index.html`) with two layouts (wide / phone) chosen by the container width.
 - `sw.js`'s `CACHE_NAME` (`odat-marafoni-v4`) must be bumped whenever cached asset contents change, or returning visitors keep the stale cache.
 - Keep `PUSH_SHARED_SECRET` in `index.html` and `SHARED_SECRET` (the Worker secret set via `wrangler secret put`) equal — they're compared directly, no hashing.
+- This repo is public. The only secret-ish value that belongs here is `PUSH_SHARED_SECRET` (public by design). Never add the VAPID **private** key or any other credential to this repo or its docs.
