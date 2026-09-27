@@ -20,6 +20,15 @@ colors:
   lapis-ink: "#14204A"
   ochre-star: "#B5730B"
   tile-turquoise-day: "#0B7A70"
+  night-bg-1: "#050814"
+  night-bg-2: "#0A1030"
+  night-bg-3: "#141033"
+  night-nebula-violet: "rgba(93,74,168,.32)"
+  night-nebula-teal: "rgba(24,92,132,.26)"
+  night-star: "#F4C567"
+  night-dust: "#C9D2FF"
+  night-dim: "#8D97C9"
+  night-line: "#2E3B72"
 typography:
   display:
     fontFamily: "Marcellus, Iowan Old Style, Palatino Linotype, Georgia, serif"
@@ -89,6 +98,8 @@ The 30-day marathon is not a table of checkmarks but a sky. Each day is a star; 
 
 Dark is the default scene (a phone in a dim room, evening, the last tick of the day); the light theme is the same chart printed on warm paper with lapis ink and ochre stars. Density is low and unhurried outside the tick grid, which stays large and precise because tapping it is the product's core action.
 
+**The sky plate is always night**, in both themes. It is a literal window, not a themed panel: a fixed near-black gradient (`night-bg-1` → `night-bg-3`) with two soft nebula glows, a slim crescent moon in the corner, and a seeded field of quietly twinkling background dust behind the marathon's own 30 stars. On the paper theme this is the single dark object on an otherwise warm page — the night showing through the page, not a mismatched card.
+
 **Key Characteristics:**
 - One star form only: the eight-pointed rosette (two overlapping squares). Partial days are plain discs sized by completion.
 - Color is committed, not sprinkled: brass means done, turquoise means now, ember means missed.
@@ -110,6 +121,11 @@ A lapis night with brass stars and one turquoise tile accent; the day theme inve
 
 ### Semantic
 - **Ember Miss** (#F08A7B; day #B23F2E): missed days only, always as a dotted outline, never a fill.
+
+### Night Sky (fixed, not theme-dependent)
+- **Night Ground** (#050814 → #0A1030 → #141033 gradient) with two nebula glows (violet `rgba(93,74,168,.32)`, teal `rgba(24,92,132,.26)`) at opposite corners.
+- **Night Star** (#F4C567) and **Night Dust** (#C9D2FF, twinkling background field) — brighter and warmer than the theme's own brass/ochre, because this panel is never read against parchment.
+- **Night Dim** (#8D97C9) for guide dashes and off-marker day numbers; **Night Line** (#2E3B72) for the hairline guide path.
 
 ### Named Rules
 **The One Meaning Per Color Rule.** Brass = achieved, turquoise = now, ember = missed. Do not reuse them decoratively.
@@ -158,7 +174,7 @@ Plates 14px, buttons and fields 10px, pills fully round, tick cells and icon but
 A 40px circle in the grid. Empty is a dashed outline; done is a solid brass rosette that ignites (scale and turn, 0.55s, exponential ease-out) only on the cell just tapped; missed past days are dotted ember; future days are disabled at 30% opacity.
 
 ### Sky chart (signature)
-Thirty stars along a dashed guide. Future days are dots, partial days are discs sized by completion, perfect days are rosettes joined by brass lines when consecutive; today has a turquoise dashed ring that marches.
+Thirty stars along a dashed guide, drawn over a fixed night ground (see Night Sky above): a crescent moon, nebula haze, and a seeded field of twinkling dust set the scene. Future days are dots, partial days are discs sized by completion, perfect days are rosettes joined by glowing brass lines when consecutive; today has a turquoise dashed ring that marches and glows. Earned marks (done tick cells, the level badge, earned achievement medals) carry the same soft `drop-shadow(0 0 3px currentColor)` glow as the sky's stars, so "lit up" reads the same everywhere in the app.
 
 ### Cards / Containers
 Plates: Lapis Plate background, 1px hairline, 14px radius, 18px padding, brass registration corners. Goals inside a plate are separated by hairlines, never nested boxes.
